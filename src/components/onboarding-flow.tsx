@@ -18,13 +18,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StepIndicator } from "@/components/step-indicator";
 import { processOnboarding } from "@/lib/actions";
 import type { SubscriptionRecommendationsOutput } from "@/ai/flows/generate-subscription-recommendations";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const steps = [
@@ -35,7 +33,7 @@ const steps = [
 ];
 
 const stepFields: FieldName<OnboardingData>[][] = [
-  ["businessName", "businessAddress", "businessIndustry", "paymentPreferences", "softwareNeeds"],
+  ["businessName", "businessAddress", "businessIndustry"],
   ["userName", "password", "confirmPassword"],
   ["cardHolderName", "cardNumber", "cardExpiry", "cardCVC", "termsOfServiceAgreement"],
 ];
@@ -52,8 +50,6 @@ export default function OnboardingFlow() {
       businessName: "",
       businessAddress: "",
       businessIndustry: "",
-      paymentPreferences: undefined,
-      softwareNeeds: "",
       userName: "",
       password: "",
       confirmPassword: "",
@@ -116,18 +112,6 @@ export default function OnboardingFlow() {
             </div>
             <FormField control={form.control} name="businessAddress" render={({ field }) => (
               <FormItem><FormLabel>Dirección del Negocio (Opcional)</FormLabel><FormControl><Input placeholder="Ej: Av. Siempreviva 742" {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
-             <FormField control={form.control} name="paymentPreferences" render={({ field }) => (
-                <FormItem className="space-y-3"><FormLabel>Preferencia de Pago</FormLabel><FormControl>
-                  <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col md:flex-row md:space-x-8 space-y-2 md:space-y-0">
-                    <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Mensual" /></FormControl><FormLabel className="font-normal">Mensual</FormLabel></FormItem>
-                    <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Trimestral" /></FormControl><FormLabel className="font-normal">Trimestral</FormLabel></FormItem>
-                    <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Anual" /></FormControl><FormLabel className="font-normal">Anual</FormLabel></FormItem>
-                  </RadioGroup>
-                </FormControl><FormMessage /></FormItem>
-              )} />
-            <FormField control={form.control} name="softwareNeeds" render={({ field }) => (
-              <FormItem><FormLabel>Necesidades de Software</FormLabel><FormControl><Textarea placeholder="Describa qué funciones son más importantes para su negocio..." {...field} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
         )}

@@ -50,10 +50,6 @@ export async function processOnboarding(data: OnboardingData): Promise<ActionSta
     const recommendations = await generateSubscriptionRecommendations({
       businessName: data.businessName,
       industry: data.businessIndustry || "N/A",
-      annualRevenue: 0, // Field removed from form
-      numberOfEmployees: 1, // Field removed from form
-      paymentPreferences: data.paymentPreferences,
-      softwareNeeds: data.softwareNeeds,
     });
 
     return {

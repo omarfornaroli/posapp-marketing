@@ -14,8 +14,6 @@ import {z} from 'genkit';
 const SubscriptionRecommendationsInputSchema = z.object({
   businessName: z.string().describe('The name of the business.'),
   industry: z.string().describe('The industry of the business.'),
-  paymentPreferences: z.string().describe('Payment preferences of the business.'),
-  softwareNeeds: z.string().describe('The specific software needs of the business.'),
 });
 export type SubscriptionRecommendationsInput = z.infer<
   typeof SubscriptionRecommendationsInputSchema
@@ -46,13 +44,10 @@ const prompt = ai.definePrompt({
 
 Business Name: {{{businessName}}}
 Industry: {{{industry}}}
-Payment Preferences: {{{paymentPreferences}}}
-Software Needs: {{{softwareNeeds}}}
 
 Consider the following factors when making your recommendations:
-- Businesses with specific software needs should be matched with plans that offer those features.
-- Payment preferences should be considered when recommending contract lengths.
 - Larger or more complex businesses might prefer premium plans.
+- Recommend a monthly contract by default.
 
 Provide a brief justification for your recommendations.
 `,
@@ -65,13 +60,7 @@ const generateSubscriptionRecommendationsFlow = ai.defineFlow(
     outputSchema: SubscriptionRecommendationsOutputSchema,
   },
   async input => {
-    // Augment the input for the flow to work without the removed fields.
-    const augmentedInput = {
-      ...input,
-      annualRevenue: 0,
-      numberOfEmployees: 1,
-    };
-    const {output} = await prompt(augmentedInput as any);
+    const {output} = await prompt(input);
     return output!;
   }
 );

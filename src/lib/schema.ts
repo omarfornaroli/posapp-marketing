@@ -7,15 +7,6 @@ export const OnboardingSchema = z.object({
     .min(2, "El nombre del negocio debe tener al menos 2 caracteres."),
   businessAddress: z.string().optional(),
   businessIndustry: z.string().optional(),
-  paymentPreferences: z.string({
-    required_error: "Por favor, seleccione una preferencia de pago.",
-  }),
-  softwareNeeds: z
-    .string()
-    .min(
-      10,
-      "Por favor, describa sus necesidades de software (mínimo 10 caracteres)."
-    ),
 
   // Step 2
   userName: z
