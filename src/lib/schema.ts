@@ -33,9 +33,10 @@ export const OnboardingSchema = z.object({
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres."),
 
   // Step 3
-  paymentDetails: z
-    .string()
-    .min(10, "Por favor, proporcione los detalles de pago. (ej. Número de tarjeta)"),
+  cardHolderName: z.string().min(2, "El nombre del titular es requerido."),
+  cardNumber: z.string().regex(/^[0-9]{16}$/, "Número de tarjeta inválido."),
+  cardExpiry: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, "Fecha de vencimiento inválida (MM/YY)."),
+  cardCVC: z.string().regex(/^[0-9]{3,4}$/, "CVC inválido."),
   termsOfServiceAgreement: z.literal<boolean>(true, {
     errorMap: () => ({ message: "Debe aceptar los términos y condiciones." }),
   }),

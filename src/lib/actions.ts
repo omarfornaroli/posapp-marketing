@@ -20,6 +20,8 @@ export async function processOnboarding(data: OnboardingData): Promise<ActionSta
     return { success: false, message: "Datos del formulario inválidos." };
   }
 
+  const paymentDetails = `Titular: ${data.cardHolderName}, Tarjeta: **** **** **** ${data.cardNumber.slice(-4)}`;
+
   try {
     // In a real app, you'd save user data to a database here
     // and interact with Mercado Pago's API.
@@ -31,7 +33,7 @@ export async function processOnboarding(data: OnboardingData): Promise<ActionSta
       businessIndustry: data.businessIndustry,
       userName: data.userName,
       password: data.password, // In a real app, hash this before storing/using
-      paymentDetails: data.paymentDetails,
+      paymentDetails: paymentDetails,
       termsOfServiceAgreement: data.termsOfServiceAgreement,
     });
 

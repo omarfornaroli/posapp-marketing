@@ -17,7 +17,7 @@ const ValidateSubscriptionDataInputSchema = z.object({
   businessIndustry: z.string().describe('The industry of the business.'),
   userName: z.string().describe('The name of the user.'),
   password: z.string().describe('The password for the user account.'),
-  paymentDetails: z.string().describe('The payment details for Mercado Pago subscription.'),
+  paymentDetails: z.string().describe('The payment details for Mercado Pago subscription. This will contain card holder and partial card number.'),
   termsOfServiceAgreement: z.boolean().describe('Whether the user agreed to the terms of service.'),
 });
 export type ValidateSubscriptionDataInput = z.infer<typeof ValidateSubscriptionDataInputSchema>;
@@ -39,7 +39,7 @@ const prompt = ai.definePrompt({
   output: {schema: ValidateSubscriptionDataOutputSchema},
   prompt: `You are an AI assistant that validates user-provided data for setting up a Mercado Pago subscription.
 
-  Determine if all the required data is present. If not, identify the missing fields.
+  Determine if all the required data is present. If not, identify the missing fields. The password field should not be considered for data completeness validation, just assume it's provided.
 
   Also, provide personalized recommendations for the subscription service based on the provided business profile details.
 

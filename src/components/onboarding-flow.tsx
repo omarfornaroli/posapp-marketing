@@ -37,7 +37,7 @@ const steps = [
 const stepFields: FieldName<OnboardingData>[][] = [
   ["businessName", "businessAddress", "businessIndustry", "annualRevenue", "numberOfEmployees", "paymentPreferences", "softwareNeeds"],
   ["userName", "password"],
-  ["paymentDetails", "termsOfServiceAgreement"],
+  ["cardHolderName", "cardNumber", "cardExpiry", "cardCVC", "termsOfServiceAgreement"],
 ];
 
 export default function OnboardingFlow() {
@@ -58,7 +58,10 @@ export default function OnboardingFlow() {
       softwareNeeds: "",
       userName: "",
       password: "",
-      paymentDetails: "",
+      cardHolderName: "",
+      cardNumber: "",
+      cardExpiry: "",
+      cardCVC: "",
       termsOfServiceAgreement: false,
     },
   });
@@ -151,9 +154,27 @@ export default function OnboardingFlow() {
 
         {currentStep === 3 && (
           <div className="space-y-6">
-            <FormField control={form.control} name="paymentDetails" render={({ field }) => (
-              <FormItem><FormLabel>Detalles de Pago (Mercado Pago)</FormLabel><FormControl><Textarea placeholder="Ingrese los detalles para la suscripción de Mercado Pago..." {...field} /></FormControl><FormMessage /></FormItem>
-            )} />
+            <Card className="border-accent">
+                <CardHeader>
+                    <CardTitle>Suscripción a Mercado Pago</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FormField control={form.control} name="cardHolderName" render={({ field }) => (
+                      <FormItem><FormLabel>Nombre del titular de la tarjeta</FormLabel><FormControl><Input placeholder="Ej: Juan Perez" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="cardNumber" render={({ field }) => (
+                      <FormItem><FormLabel>Número de Tarjeta</FormLabel><FormControl><Input placeholder="**** **** **** ****" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="cardExpiry" render={({ field }) => (
+                          <FormItem><FormLabel>Vencimiento</FormLabel><FormControl><Input placeholder="MM/YY" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="cardCVC" render={({ field }) => (
+                          <FormItem><FormLabel>CVC</FormLabel><FormControl><Input placeholder="123" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </div>
+                </CardContent>
+            </Card>
             <FormField control={form.control} name="termsOfServiceAgreement" render={({ field }) => (
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl>
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
