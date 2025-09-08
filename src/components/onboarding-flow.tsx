@@ -35,8 +35,8 @@ const steps = [
 ];
 
 const stepFields: FieldName<OnboardingData>[][] = [
-  ["businessName", "businessAddress", "businessIndustry", "annualRevenue", "numberOfEmployees", "paymentPreferences", "softwareNeeds"],
-  ["userName", "password"],
+  ["businessName", "businessAddress", "businessIndustry", "paymentPreferences", "softwareNeeds"],
+  ["userName", "password", "confirmPassword"],
   ["cardHolderName", "cardNumber", "cardExpiry", "cardCVC", "termsOfServiceAgreement"],
 ];
 
@@ -52,12 +52,11 @@ export default function OnboardingFlow() {
       businessName: "",
       businessAddress: "",
       businessIndustry: "",
-      annualRevenue: undefined,
-      numberOfEmployees: undefined,
       paymentPreferences: undefined,
       softwareNeeds: "",
       userName: "",
       password: "",
+      confirmPassword: "",
       cardHolderName: "",
       cardNumber: "",
       cardExpiry: "",
@@ -112,20 +111,12 @@ export default function OnboardingFlow() {
                 <FormItem><FormLabel>Nombre del Negocio</FormLabel><FormControl><Input placeholder="Ej: Mi Tienda S.A." {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="businessIndustry" render={({ field }) => (
-                <FormItem><FormLabel>Industria</FormLabel><FormControl><Input placeholder="Ej: Venta al por menor" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Industria (Opcional)</FormLabel><FormControl><Input placeholder="Ej: Venta al por menor" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
             </div>
             <FormField control={form.control} name="businessAddress" render={({ field }) => (
-              <FormItem><FormLabel>Dirección del Negocio</FormLabel><FormControl><Input placeholder="Ej: Av. Siempreviva 742" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Dirección del Negocio (Opcional)</FormLabel><FormControl><Input placeholder="Ej: Av. Siempreviva 742" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField control={form.control} name="annualRevenue" render={({ field }) => (
-                <FormItem><FormLabel>Ingresos Anuales (USD)</FormLabel><FormControl><Input type="number" placeholder="Ej: 50000" {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={form.control} name="numberOfEmployees" render={({ field }) => (
-                <FormItem><FormLabel>Número de Empleados</FormLabel><FormControl><Input type="number" placeholder="Ej: 5" {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-            </div>
              <FormField control={form.control} name="paymentPreferences" render={({ field }) => (
                 <FormItem className="space-y-3"><FormLabel>Preferencia de Pago</FormLabel><FormControl>
                   <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col md:flex-row md:space-x-8 space-y-2 md:space-y-0">
@@ -147,7 +138,10 @@ export default function OnboardingFlow() {
               <FormItem><FormLabel>Nombre de Usuario</FormLabel><FormControl><Input placeholder="Ej: juanperez" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="password" render={({ field }) => (
-              <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormDescription>Debe tener al menos 8 caracteres.</FormDescription><FormMessage /></FormItem>
+              <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormDescription>Debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.</FormDescription><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                <FormItem><FormLabel>Confirmar Contraseña</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
         )}

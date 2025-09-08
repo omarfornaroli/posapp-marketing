@@ -29,8 +29,8 @@ export async function processOnboarding(data: OnboardingData): Promise<ActionSta
     // Step 1: Validate data completeness with AI
     const validationResult = await validateSubscriptionData({
       businessName: data.businessName,
-      businessAddress: data.businessAddress,
-      businessIndustry: data.businessIndustry,
+      businessAddress: data.businessAddress || "",
+      businessIndustry: data.businessIndustry || "",
       userName: data.userName,
       password: data.password, // In a real app, hash this before storing/using
       paymentDetails: paymentDetails,
@@ -49,9 +49,9 @@ export async function processOnboarding(data: OnboardingData): Promise<ActionSta
     // Step 2: Generate subscription recommendations with AI
     const recommendations = await generateSubscriptionRecommendations({
       businessName: data.businessName,
-      industry: data.businessIndustry,
-      annualRevenue: data.annualRevenue,
-      numberOfEmployees: data.numberOfEmployees,
+      industry: data.businessIndustry || "N/A",
+      annualRevenue: 0, // Field removed from form
+      numberOfEmployees: 1, // Field removed from form
       paymentPreferences: data.paymentPreferences,
       softwareNeeds: data.softwareNeeds,
     });

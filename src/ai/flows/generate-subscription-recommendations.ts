@@ -14,8 +14,6 @@ import {z} from 'genkit';
 const SubscriptionRecommendationsInputSchema = z.object({
   businessName: z.string().describe('The name of the business.'),
   industry: z.string().describe('The industry of the business.'),
-  annualRevenue: z.number().describe('The annual revenue of the business.'),
-  numberOfEmployees: z.number().describe('The number of employees in the business.'),
   paymentPreferences: z.string().describe('Payment preferences of the business.'),
   softwareNeeds: z.string().describe('The specific software needs of the business.'),
 });
@@ -48,15 +46,13 @@ const prompt = ai.definePrompt({
 
 Business Name: {{{businessName}}}
 Industry: {{{industry}}}
-Annual Revenue: {{{annualRevenue}}}
-Number of Employees: {{{numberOfEmployees}}}
 Payment Preferences: {{{paymentPreferences}}}
 Software Needs: {{{softwareNeeds}}}
 
 Consider the following factors when making your recommendations:
-- Businesses with higher annual revenue and more employees may benefit from premium plans with more features.
 - Businesses with specific software needs should be matched with plans that offer those features.
 - Payment preferences should be considered when recommending contract lengths.
+- Larger or more complex businesses might prefer premium plans.
 
 Provide a brief justification for your recommendations.
 `,
@@ -69,7 +65,13 @@ const generateSubscriptionRecommendationsFlow = ai.defineFlow(
     outputSchema: SubscriptionRecommendationsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    // Augment the input for the flow to work without the removed fields.
+    const augmentedInput = {
+      ...input,
+      annualRevenue: 0,
+      numberOfEmployees: 1,
+    };
+    const {output} = await prompt(augmentedInput as any);
     return output!;
   }
 );
