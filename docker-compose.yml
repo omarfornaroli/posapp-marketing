@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ventaconnect-app
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - APP_TITLE=${APP_TITLE}
+      - PORT=${PORT}
+      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:${MONGO_PORT}/${MONGO_DB}?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - ventaconnect-net
+
+  mongodb:
+    image: mongo:latest
+    container_name: ventaconnect-db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DB}
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - ventaconnect-net
+
+networks:
+  ventaconnect-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local

@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'VentaConnect Onboarding',
+  title: process.env.APP_TITLE || 'VentaConnect Onboarding',
   description: 'Client registration for VentaConnect POS.',
 };
 
