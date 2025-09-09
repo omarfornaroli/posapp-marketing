@@ -9,7 +9,7 @@ export default function Home() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2 font-headline">
             {appTitle}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-base sm:text-lg text-muted-foreground">
             Regístrese para comenzar a usar nuestro sistema de punto de venta.
             </p>
         </div>

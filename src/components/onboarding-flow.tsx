@@ -101,8 +101,8 @@ export default function OnboardingFlow() {
         transition={{ duration: 0.3 }}
       >
         {currentStep === 1 && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <FormField control={form.control} name="businessName" render={({ field }) => (
                 <FormItem><FormLabel>Nombre del Negocio</FormLabel><FormControl><Input placeholder="Ej: Mi Tienda S.A." {...field} /></FormControl><FormMessage /></FormItem>
               )} />
@@ -117,7 +117,7 @@ export default function OnboardingFlow() {
         )}
 
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <FormField control={form.control} name="userName" render={({ field }) => (
               <FormItem><FormLabel>Nombre de Usuario</FormLabel><FormControl><Input placeholder="Ej: juanperez" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
@@ -131,10 +131,10 @@ export default function OnboardingFlow() {
         )}
 
         {currentStep === 3 && (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <Card className="border-accent">
                 <CardHeader>
-                    <CardTitle>Suscripción a Mercado Pago</CardTitle>
+                    <CardTitle className="text-xl sm:text-2xl">Suscripción a Mercado Pago</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <FormField control={form.control} name="cardHolderName" render={({ field }) => (
@@ -169,24 +169,24 @@ export default function OnboardingFlow() {
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
               <PartyPopper className="w-16 h-16 mx-auto text-accent" />
             </motion.div>
-            <h2 className="mt-6 text-2xl font-bold text-primary">¡Bienvenido a VentaConnect!</h2>
-            <p className="mt-2 text-muted-foreground">Su cuenta ha sido creada exitosamente.</p>
-            <Card className="mt-8 text-left">
+            <h2 className="mt-6 text-2xl sm:text-3xl font-bold text-primary">¡Bienvenido a VentaConnect!</h2>
+            <p className="mt-2 text-base sm:text-lg text-muted-foreground">Su cuenta ha sido creada exitosamente.</p>
+            <Card className="mt-6 sm:mt-8 text-left">
               <CardHeader>
-                <CardTitle>Recomendación de Suscripción Personalizada</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">Recomendación de Suscripción</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 text-sm sm:text-base">
                 <div>
                   <h4 className="font-semibold">Nivel de Precio Recomendado:</h4>
-                  <p className="text-accent font-bold text-lg">{recommendations.recommendedPriceLevel}</p>
+                  <p className="text-accent font-bold text-base sm:text-lg">{recommendations.recommendedPriceLevel}</p>
                 </div>
                 <div>
                   <h4 className="font-semibold">Duración de Contrato Sugerida:</h4>
-                  <p className="text-accent font-bold text-lg">{recommendations.recommendedContractLength}</p>
+                  <p className="text-accent font-bold text-base sm:text-lg">{recommendations.recommendedContractLength}</p>
                 </div>
                 <div>
                   <h4 className="font-semibold">Justificación:</h4>
-                  <p className="text-muted-foreground text-sm">{recommendations.justification}</p>
+                  <p className="text-muted-foreground text-xs sm:text-sm">{recommendations.justification}</p>
                 </div>
               </CardContent>
             </Card>
@@ -198,22 +198,22 @@ export default function OnboardingFlow() {
 
   return (
     <Card className="w-full">
-      <CardContent className="p-6 sm:p-8">
+      <CardContent className="p-4 sm:p-6 md:p-8">
         <StepIndicator steps={steps} currentStep={currentStep} />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {error && (
-              <Alert variant="destructive" className="mb-6">
+              <Alert variant="destructive" className="mb-4 sm:mb-6">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <div className="min-h-[420px] flex flex-col justify-center">
+            <div className="min-h-[380px] sm:min-h-[420px] flex flex-col justify-center px-2 sm:px-0">
               {formContent}
             </div>
             {currentStep < 4 && (
-              <CardFooter className="flex justify-between p-0 pt-8">
+              <CardFooter className="flex justify-between p-0 pt-6 sm:pt-8">
                 <Button type="button" variant="outline" onClick={handleBack} disabled={currentStep === 1 || isLoading}>
                   Atrás
                 </Button>
