@@ -16,7 +16,35 @@ interface StepIndicatorProps {
 }
 
 export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
-    const isMobile = useIsMobile();
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const activeStep = steps[currentStep - 1];
+    return (
+      <div className="flex flex-col items-center w-full mb-8">
+        <div className="flex items-center text-primary">
+          <activeStep.icon className="w-6 h-6 mr-3" />
+          <h3 className="text-lg font-bold">{activeStep.mobileLabel}</h3>
+        </div>
+        <div className="flex items-center justify-center mt-4 space-x-2">
+          {steps.map((_, index) => {
+            const stepNumber = index + 1;
+            const isActive = stepNumber === currentStep;
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "rounded-full transition-all duration-300",
+                  isActive ? "w-3 h-3 bg-primary" : "w-2 h-2 bg-border"
+                )}
+              />
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-start justify-center w-full mb-8 sm:mb-12">
       {steps.map((step, index) => {
@@ -45,7 +73,7 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
                   isActive ? "text-primary font-bold" : "text-muted-foreground"
                 )}
               >
-                {isMobile ? step.mobileLabel : step.label}
+                {step.label}
               </p>
             </div>
             {index < steps.length - 1 && (
