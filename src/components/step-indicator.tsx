@@ -2,10 +2,12 @@
 
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Step {
   icon: LucideIcon;
   label: string;
+  mobileLabel: string;
 }
 
 interface StepIndicatorProps {
@@ -14,6 +16,7 @@ interface StepIndicatorProps {
 }
 
 export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
+    const isMobile = useIsMobile();
   return (
     <div className="flex items-start justify-center w-full mb-8 sm:mb-12">
       {steps.map((step, index) => {
@@ -38,15 +41,15 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
               </div>
               <p
                 className={cn(
-                  "mt-2 text-xs sm:text-sm font-medium transition-colors duration-300 w-20",
+                  "mt-2 text-xs sm:text-sm font-medium transition-colors duration-300 w-16 sm:w-20",
                   isActive ? "text-primary font-bold" : "text-muted-foreground"
                 )}
               >
-                {step.label}
+                {isMobile ? step.mobileLabel : step.label}
               </p>
             </div>
             {index < steps.length - 1 && (
-              <div className="flex-auto h-px bg-border relative mx-4">
+              <div className="flex-auto h-px bg-border relative mx-2 sm:mx-4">
                  <div
                   className={cn(
                     "absolute top-0 left-0 h-full bg-primary transition-all duration-500",

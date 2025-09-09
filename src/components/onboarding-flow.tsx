@@ -26,10 +26,10 @@ import type { SubscriptionRecommendationsOutput } from "@/ai/flows/generate-subs
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const steps = [
-  { icon: Building2, label: "Negocio" },
-  { icon: User, label: "Usuario" },
-  { icon: CreditCard, label: "Pago" },
-  { icon: PartyPopper, label: "Finalizar" },
+  { icon: Building2, label: "Negocio", mobileLabel: "Negocio" },
+  { icon: User, label: "Usuario", mobileLabel: "Usuario" },
+  { icon: CreditCard, label: "Pago", mobileLabel: "Pago" },
+  { icon: PartyPopper, label: "Finalizar", mobileLabel: "Finalizar" },
 ];
 
 const stepFields: FieldName<OnboardingData>[][] = [
