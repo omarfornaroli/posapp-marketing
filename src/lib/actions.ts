@@ -1,11 +1,15 @@
 "use server";
 
+import bcrypt from "bcryptjs";
 import { OnboardingSchema, type OnboardingData } from "@/lib/schema";
 import { validateSubscriptionData } from "@/ai/flows/validate-subscription-data";
 import {
   generateSubscriptionRecommendations,
   type SubscriptionRecommendationsOutput,
 } from "@/ai/flows/generate-subscription-recommendations";
+import { connectToDatabase } from "@/lib/mongodb";
+import User from "@/models/user";
+
 
 interface ActionState {
   success: boolean;
@@ -16,23 +20,18 @@ interface ActionState {
 export async function processOnboarding(data: OnboardingData): Promise<ActionState> {
   const validatedForm = OnboardingSchema.safeParse(data);
   if (!validatedForm.success) {
-    // This should ideally not happen if client-side validation is working
     return { success: false, message: "Datos del formulario inválidos." };
   }
 
   const paymentDetails = `Titular: ${data.cardHolderName}, Tarjeta: **** **** **** ${data.cardNumber.slice(-4)}`;
 
   try {
-    // In a real app, you'd save user data to a database here
-    // and interact with Mercado Pago's API.
-
-    // Step 1: Validate data completeness with AI
     const validationResult = await validateSubscriptionData({
       businessName: data.businessName,
       businessAddress: data.businessAddress || "",
       businessIndustry: data.businessIndustry || "",
       userName: data.userName,
-      password: data.password, // In a real app, hash this before storing/using
+      password: data.password,
       paymentDetails: paymentDetails,
       termsOfServiceAgreement: data.termsOfServiceAgreement,
     });
@@ -45,8 +44,30 @@ export async function processOnboarding(data: OnboardingData): Promise<ActionSta
         )}`,
       };
     }
+    
+    await connectToDatabase();
+    
+    const existingUser = await User.findOne({ userName: data.userName });
+    if (existingUser) {
+        return { success: false, message: "El nombre de usuario ya existe." };
+    }
 
-    // Step 2: Generate subscription recommendations with AI
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const newUser = new User({
+        businessName: data.businessName,
+        businessAddress: data.businessAddress,
+        businessIndustry: data.businessIndustry,
+        userName: data.userName,
+        password: hashedPassword,
+        cardInfo: {
+            holderName: data.cardHolderName,
+            last4: data.cardNumber.slice(-4),
+        }
+    });
+
+    await newUser.save();
+
     const recommendations = await generateSubscriptionRecommendations({
       businessName: data.businessName,
       industry: data.businessIndustry || "N/A",
@@ -59,6 +80,9 @@ export async function processOnboarding(data: OnboardingData): Promise<ActionSta
     };
   } catch (error) {
     console.error("Onboarding process failed:", error);
+    if (error instanceof Error && error.message.includes("duplicate key")) {
+        return { success: false, message: "El nombre de usuario ya está en uso." };
+    }
     return {
       success: false,
       message:
