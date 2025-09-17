@@ -12,7 +12,7 @@ services:
       - APP_TITLE=${APP_TITLE}
       - PORT=${PORT}
       # This is the connection string for the mongo service defined below.
-      - MONGODB_URI=mongodb://mongo:27018/posapp
+      - MONGODB_URI=mongodb://mongo:27017/posapp
       # Demo data is disabled for this Docker setup.
       # Change to 'true' if you want to load demo data on first run.
       - LOAD_DEMO_DATA=false
@@ -23,18 +23,25 @@ services:
       - .:/app
     depends_on:
       - mongo
+    networks:
+      - ventaconnect-net
     restart: unless-stopped
 
   mongo:
     image: mongo:latest
     container_name: ventaconnect-mongo
     ports:
-      - "27018:27018"
+      - "27017:27017"
     volumes:
       - marketing-mongo-data:/data/db
     networks:
       - ventaconnect-net
+    restart: unless-stopped
+
+networks:
+  ventaconnect-net:
+    driver: bridge
 
 volumes:
-  ventaconnect-net:
+  marketing-mongo-data:
     driver: local
