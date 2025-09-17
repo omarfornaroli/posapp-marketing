@@ -1,15 +1,7 @@
-"use server";
+'use server';
 
-import bcrypt from "bcryptjs";
-import { OnboardingSchema, type OnboardingData } from "@/lib/schema";
-import { validateSubscriptionData } from "@/ai/flows/validate-subscription-data";
-import {
-  generateSubscriptionRecommendations,
-  type SubscriptionRecommendationsOutput,
-} from "@/ai/flows/generate-subscription-recommendations";
-import { connectToDatabase } from "@/lib/mongodb";
-import User from "@/models/user";
-
+import type {OnboardingData} from '@/lib/schema';
+import type {SubscriptionRecommendationsOutput} from '@/ai/flows/generate-subscription-recommendations';
 
 interface ActionState {
   success: boolean;
@@ -17,76 +9,34 @@ interface ActionState {
   recommendations?: SubscriptionRecommendationsOutput;
 }
 
-export async function processOnboarding(data: OnboardingData): Promise<ActionState> {
-  const validatedForm = OnboardingSchema.safeParse(data);
-  if (!validatedForm.success) {
-    return { success: false, message: "Datos del formulario inválidos." };
-  }
-
-  const paymentDetails = `Titular: ${data.cardHolderName}, Tarjeta: **** **** **** ${data.cardNumber.slice(-4)}`;
-
+export async function processOnboarding(
+  data: OnboardingData
+): Promise<ActionState> {
   try {
-    const validationResult = await validateSubscriptionData({
-      businessName: data.businessName,
-      businessAddress: data.businessAddress || "",
-      businessIndustry: data.businessIndustry || "",
-      userName: data.userName,
-      password: data.password,
-      paymentDetails: paymentDetails,
-      termsOfServiceAgreement: data.termsOfServiceAgreement,
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/register`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
-    if (!validationResult.isDataComplete) {
-      return {
-        success: false,
-        message: `Por favor, complete todos los campos requeridos. Faltan: ${validationResult.missingFields.join(
-          ", "
-        )}`,
-      };
-    }
-    
-    await connectToDatabase();
-    
-    const existingUser = await User.findOne({ userName: data.userName });
-    if (existingUser) {
-        return { success: false, message: "El nombre de usuario ya existe." };
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {success: false, message: result.message || 'An error occurred.'};
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-
-    const newUser = new User({
-        businessName: data.businessName,
-        businessAddress: data.businessAddress,
-        businessIndustry: data.businessIndustry,
-        userName: data.userName,
-        password: hashedPassword,
-        cardInfo: {
-            holderName: data.cardHolderName,
-            last4: data.cardNumber.slice(-4),
-        }
-    });
-
-    await newUser.save();
-
-    const recommendations = await generateSubscriptionRecommendations({
-      businessName: data.businessName,
-      industry: data.businessIndustry || "N/A",
-    });
-
-    return {
-      success: true,
-      message: "¡Registro completado con éxito!",
-      recommendations,
-    };
+    return result;
   } catch (error) {
-    console.error("Onboarding process failed:", error);
-    if (error instanceof Error && error.message.includes("duplicate key")) {
-        return { success: false, message: "El nombre de usuario ya está en uso." };
-    }
+    console.error('Onboarding process failed:', error);
     return {
       success: false,
       message:
-        "Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde.",
+        'Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde.',
     };
   }
 }
