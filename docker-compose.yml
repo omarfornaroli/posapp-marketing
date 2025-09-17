@@ -45,3 +45,7 @@ networks:
 volumes:
   marketing-mongo-data:
     driver: local
+
+volumes:
+  marketing-mongo-data:
+    driver: local
