@@ -31,7 +31,7 @@ services:
     ports:
       - "27018:27018"
     volumes:
-      - mongo-data:/data/db
+      - marketing-mongo-data:/data/db
     networks:
       - ventaconnect-net
 
