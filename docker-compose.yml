@@ -7,12 +7,12 @@ services:
       dockerfile: Dockerfile
     container_name: ventaconnect-app
     ports:
-      - "${PORT}:${PORT}"
+      - "9003:3000"
     environment:
       - APP_TITLE=${APP_TITLE}
       - PORT=${PORT}
       # This is the connection string for the mongo service defined below.
-      - MONGODB_URI=mongodb://mongo:27017/posapp
+      - MONGODB_URI=mongodb://mongo:27018/posapp
       # Demo data is disabled for this Docker setup.
       # Change to 'true' if you want to load demo data on first run.
       - LOAD_DEMO_DATA=false
