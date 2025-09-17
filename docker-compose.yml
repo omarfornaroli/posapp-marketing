@@ -31,7 +31,7 @@ services:
     image: mongo:latest
     container_name: ventaconnect-mongo
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - marketing-mongo-data:/data/db
     networks:
