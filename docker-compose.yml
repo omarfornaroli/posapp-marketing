@@ -27,7 +27,7 @@ services:
 
   mongo:
     image: mongo:latest
-    container_name: posapp-mongo
+    container_name: ventaconnect-mongo
     ports:
       - "27018:27018"
     volumes:
