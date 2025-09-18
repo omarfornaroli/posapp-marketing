@@ -19,4 +19,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Comando por defecto
-CMD ["npm", "run", "start"]
+RUN npm run start
