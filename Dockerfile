@@ -1,22 +1,29 @@
-# Stage 1: Build the application
-FROM node:20-alpine AS builder
-
+# 1. Etapa de dependencias (Deps)
+FROM --platform=linux/amd64 node:20-alpine AS deps
 WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm install --frozen-lockfile --prod
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application source code
+# 2. Etapa de construcción (Builder)
+FROM --platform=linux/amd64 node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Build the Next.js application
 RUN npm run build
 
-# Expose the port the app runs on
+# 3. Etapa final de ejecución (Runner)
+FROM --platform=linux/amd64 node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+# El puerto 3000 es el que exponemos en docker-compose.yml
+ENV PORT 3000
 EXPOSE 3000
 
-# The CMD should refer to an env var for the port
-CMD ["npm", "start", "--", "-p", "3000"]
+CMD ["npm", "run", "start"]
