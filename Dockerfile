@@ -13,4 +13,4 @@ COPY package*.json ./
 COPY . .
 
 # Instalamos dependencias
-CMD ["npm", "i", "&&", "npm", "run", "build", "&&", "npm", "run", "start"]
+CMD ["sh", "-c", "npm install && npm run build && npm run start"]
