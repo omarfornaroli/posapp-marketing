@@ -3,20 +3,14 @@ FROM node:20-alpine
 # Definimos el directorio de trabajo
 WORKDIR /app
 
+# Exponemos el puerto de la app
+EXPOSE 3000
+
 # Copiamos package.json y package-lock.json primero para aprovechar la cache
 COPY package*.json ./
-
-# Instalamos dependencias
 
 # Copiamos el resto del proyecto
 COPY . .
 
-# Construimos la app de Next.js
-CMD ["npm", "i"]
-
-CMD ["npm", "run", "build"]
-# Exponemos el puerto de la app
-EXPOSE 3000
-
-# Comando por defecto
-CMD ["npm", "run", "start"]
+# Instalamos dependencias
+CMD ["npm", "i", "&&", "npm", "run", "build", "&&", "npm", "run", "start"]
