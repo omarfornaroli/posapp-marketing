@@ -19,7 +19,8 @@ import {
   Database,
   Globe,
   Loader2,
-  Link,
+  Link as LinkIcon,
+  ExternalLink,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -99,8 +100,11 @@ export default function DeployPage() {
   } = statusConfig[currentStatus];
 
   const generateUrl = (name: string) => {
+    if (!name) return '';
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
   }
+
+  const fullUrl = profile ? `http://168.181.187.83:${appPort}/${generateUrl(profile.businessName)}` : '';
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -141,7 +145,7 @@ export default function DeployPage() {
                   <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-48" /></div>
                   <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-40" /></div>
                   <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-56" /></div>
-                  <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-64" /></div>
+                  <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-64" /><Skeleton className="h-8 w-20" /></div>
                 </>
               ) : (
                 <ul className="space-y-3 text-sm text-muted-foreground">
@@ -163,9 +167,15 @@ export default function DeployPage() {
                             <code className="bg-muted px-2 py-1 rounded-md">{generateUrl(profile.businessName)}</code>
                         </li>
                         <li className="flex items-center gap-3">
-                            <Link className="h-5 w-5 text-primary"/>
+                            <LinkIcon className="h-5 w-5 text-primary"/>
                             <span className="font-semibold text-foreground">URL Completa:</span>
-                            <code className="bg-muted px-2 py-1 rounded-md">{`http://168.181.187.83:${appPort}/${generateUrl(profile.businessName)}`}</code>
+                            <code className="bg-muted px-2 py-1 rounded-md mr-2">{fullUrl}</code>
+                            <Button asChild variant="outline" size="sm">
+                              <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                Abrir
+                              </a>
+                            </Button>
                         </li>
                       </>
                     )}
