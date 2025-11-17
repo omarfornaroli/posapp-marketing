@@ -19,6 +19,7 @@ import {
   Database,
   Globe,
   Loader2,
+  Link,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -61,6 +62,7 @@ export default function DeployPage() {
   const currentStatus: DeployStatus = 'funcionando';
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const appPort = 9003;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -139,13 +141,14 @@ export default function DeployPage() {
                   <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-48" /></div>
                   <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-40" /></div>
                   <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-56" /></div>
+                  <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-64" /></div>
                 </>
               ) : (
                 <ul className="space-y-3 text-sm text-muted-foreground">
                     <li className="flex items-center gap-3">
                         <Server className="h-5 w-5 text-primary"/>
                         <span className="font-semibold text-foreground">Puerto de la App:</span>
-                        <code className="bg-muted px-2 py-1 rounded-md">9003</code>
+                        <code className="bg-muted px-2 py-1 rounded-md">{appPort}</code>
                     </li>
                      <li className="flex items-center gap-3">
                         <Database className="h-5 w-5 text-primary"/>
@@ -153,11 +156,18 @@ export default function DeployPage() {
                         <code className="bg-muted px-2 py-1 rounded-md">27028</code>
                     </li>
                     {profile?.businessName && (
-                      <li className="flex items-center gap-3">
-                          <Globe className="h-5 w-5 text-primary"/>
-                          <span className="font-semibold text-foreground">URL Base:</span>
-                          <code className="bg-muted px-2 py-1 rounded-md">{generateUrl(profile.businessName)}</code>
-                      </li>
+                      <>
+                        <li className="flex items-center gap-3">
+                            <Globe className="h-5 w-5 text-primary"/>
+                            <span className="font-semibold text-foreground">URL Base:</span>
+                            <code className="bg-muted px-2 py-1 rounded-md">{generateUrl(profile.businessName)}</code>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <Link className="h-5 w-5 text-primary"/>
+                            <span className="font-semibold text-foreground">URL Completa:</span>
+                            <code className="bg-muted px-2 py-1 rounded-md">{`http://168.181.187.83:${appPort}/${generateUrl(profile.businessName)}`}</code>
+                        </li>
+                      </>
                     )}
                 </ul>
               )}
