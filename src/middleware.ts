@@ -8,6 +8,9 @@ export async function middleware(request: NextRequest) {
 
   const isAuthRoute = pathname === '/login' || pathname === '/register';
   const isProtectedRoute = pathname.startsWith('/dashboard');
+
+  // This is the secret key used to sign the JWT.
+  // It MUST be loaded from environment variables.
   const secret = new TextEncoder().encode(
     process.env.JWT_SECRET || 'your-fallback-secret'
   );
@@ -58,6 +61,16 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Define which routes the middleware should run on.
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };
