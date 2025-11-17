@@ -5,6 +5,7 @@ import { useForm, type FieldName } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Building2, User, CreditCard, PartyPopper, Loader2, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { OnboardingSchema, type OnboardingData } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ import { StepIndicator } from "@/components/step-indicator";
 import { processOnboarding } from "@/lib/actions";
 import type { SubscriptionRecommendationsOutput } from "@/ai/flows/generate-subscription-recommendations";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+
 
 const steps = [
   { icon: Building2, label: "Negocio", mobileLabel: "Paso 1: Negocio" },
@@ -43,19 +46,8 @@ export default function OnboardingFlow() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<SubscriptionRecommendationsOutput | null>(null);
-
-  const form = useForm<OnboardingData>({
-    resolver: zodResolver(OnboardingSchema),
-    defaultValues: {
-      businessName: "",
-      businessAddress: "",
-      businessIndustry: "",
-      email: "",
-      password: "",
-      termsOfServiceAgreement: false,
-    },
-    mode: "onBlur",
-  });
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleNext = async () => {
     const fieldsToValidate = stepFields[currentStep - 1];
@@ -75,8 +67,11 @@ export default function OnboardingFlow() {
     try {
       const result = await processOnboarding(data);
       if (result.success) {
-        setRecommendations(result.recommendations);
-        setCurrentStep(4);
+        toast({
+            title: "¡Registro Exitoso!",
+            description: "Tu cuenta ha sido creada. Ahora puedes iniciar sesión.",
+        });
+        router.push('/login');
       } else {
         setError(result.message || "An unknown error occurred.");
       }
