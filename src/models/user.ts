@@ -5,7 +5,7 @@ export interface IUser extends Document {
   businessAddress?: string;
   businessIndustry?: string;
   email: string;
-  password?: string; // Optional because we might not want to send it back
+  password?: string;
   createdAt: Date;
 }
 
@@ -14,7 +14,7 @@ const UserSchema: Schema = new Schema({
   businessAddress: { type: String },
   businessIndustry: { type: String },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true, select: false },
+  password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

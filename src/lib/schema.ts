@@ -11,20 +11,11 @@ export const OnboardingSchema = z.object({
   // Step 2
   email: z.string().email("El email no es válido.").optional().or(z.literal('')),
   password: z.string().optional().or(z.literal('')),
-  confirmPassword: z.string().optional().or(z.literal('')),
 
   // Step 3
   termsOfServiceAgreement: z.literal<boolean>(true, {
     errorMap: () => ({ message: "Debe aceptar los términos y condiciones." }),
   }),
-}).refine((data) => {
-  if (data.password || data.confirmPassword) {
-    return data.password === data.confirmPassword;
-  }
-  return true;
-}, {
-  message: "Las contraseñas no coinciden.",
-  path: ["confirmPassword"],
 }).refine(data => {
   if (data.email && data.password) {
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(data.password);

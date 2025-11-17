@@ -34,7 +34,7 @@ const steps = [
 
 const stepFields: FieldName<OnboardingData>[][] = [
   ["businessName", "businessAddress", "businessIndustry"],
-  ["email", "password", "confirmPassword"],
+  ["email", "password"],
   ["termsOfServiceAgreement"],
 ];
 
@@ -52,7 +52,6 @@ export default function OnboardingFlow() {
       businessIndustry: "",
       email: "",
       password: "",
-      confirmPassword: "",
       termsOfServiceAgreement: false,
     },
     mode: "onBlur",
@@ -120,9 +119,6 @@ export default function OnboardingFlow() {
             )} />
             <FormField control={form.control} name="password" render={({ field }) => (
               <FormItem><FormLabel>Contraseña (Opcional)</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormDescription>Si lo dejas en blanco, se usará una contraseña por defecto. Si la ingresas, debe tener al menos 8 caracteres, mayúscula, minúscula, número y un símbolo.</FormDescription><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                <FormItem><FormLabel>Confirmar Contraseña</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
         )}
