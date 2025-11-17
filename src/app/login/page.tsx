@@ -75,7 +75,7 @@ export default function LoginPage() {
                 });
                 // Redirect using the URL from the API response
                 if (result.redirectTo) {
-                  router.push(result.redirectTo);
+                  window.location.href = result.redirectTo;
                 }
             }
         } catch (e) {
