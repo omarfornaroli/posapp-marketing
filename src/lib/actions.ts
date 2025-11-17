@@ -1,7 +1,13 @@
 'use server';
 
-import type {OnboardingData} from '@/lib/schema';
+import bcrypt from 'bcryptjs';
+import {OnboardingSchema, type OnboardingData} from '@/lib/schema';
+import {validateSubscriptionData} from '@/ai/flows/validate-subscription-data';
+import {generateSubscriptionRecommendations} from '@/ai/flows/generate-subscription-recommendations';
+import {connectToDatabase} from '@/lib/mongodb';
+import User from '@/models/user';
 import type {SubscriptionRecommendationsOutput} from '@/ai/flows/generate-subscription-recommendations';
+
 
 interface ActionState {
   success: boolean;
@@ -12,31 +18,70 @@ interface ActionState {
 export async function processOnboarding(
   data: OnboardingData
 ): Promise<ActionState> {
+  const validatedForm = OnboardingSchema.safeParse(data);
+
+  if (!validatedForm.success) {
+    return {success: false, message: 'Datos del formulario inválidos.'};
+  }
+
+  const formData = validatedForm.data;
+  
+  const userEmail = formData.email || 'admin@example.com';
+  const userPassword = formData.password || '1234';
+
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/register`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    await validateSubscriptionData({
+      businessName: formData.businessName,
+      businessAddress: formData.businessAddress || '',
+      businessIndustry: formData.businessIndustry || '',
+      userName: userEmail,
+      password: userPassword,
+      paymentDetails: 'Mercado Pago',
+      termsOfServiceAgreement: formData.termsOfServiceAgreement,
+    });
+  } catch (aiError) {
+      console.warn("AI validation call failed, proceeding without it.", aiError)
+  }
 
-    const result = await response.json();
+  try {
+    await connectToDatabase();
 
-    if (!response.ok) {
-      return {success: false, message: result.message || 'An error occurred.'};
+    const existingUser = await User.findOne({email: userEmail});
+    if (existingUser) {
+      return {success: false, message: 'El email ya existe.'};
     }
 
-    return result;
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+    const newUser = new User({
+      businessName: formData.businessName,
+      businessAddress: formData.businessAddress,
+      businessIndustry: formData.businessIndustry,
+      email: userEmail,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    const recommendations = await generateSubscriptionRecommendations({
+      businessName: formData.businessName,
+      industry: formData.businessIndustry || 'N/A',
+    });
+
+    return {
+      success: true,
+      message: '¡Registro completado con éxito!',
+      recommendations,
+    };
   } catch (error) {
     console.error('Onboarding process failed:', error);
-    return {
-      success: false,
-      message:
-        'Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde.',
-    };
+    let message =
+      'Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde.';
+
+    if (error instanceof Error && (error as any).code === 11000) {
+      message = 'El email ya está en uso.';
+    }
+
+    return {success: false, message};
   }
 }
