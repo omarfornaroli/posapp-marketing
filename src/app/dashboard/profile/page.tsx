@@ -1,17 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Building, Mail, MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { User, Building, Mail, MapPin, Loader2, AlertCircle, KeyRound } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
   name: string;
@@ -21,6 +30,22 @@ interface UserProfile {
   businessIndustry: string;
   businessAddress: string;
 }
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, { message: "La contraseña actual es requerida." }),
+  newPassword: z.string().min(8, { message: "La nueva contraseña debe tener al menos 8 caracteres." }).refine(data => {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(data);
+  }, {
+      message: "La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.",
+      path: ["newPassword"],
+  }),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Las contraseñas no coinciden.",
+  path: ["confirmPassword"],
+});
+
+type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
 const ProfileSkeleton = () => (
     <Card className="max-w-2xl mx-auto">
@@ -52,6 +77,9 @@ const ProfileSkeleton = () => (
                 </div>
             </div>
         </CardContent>
+        <CardFooter>
+            <Skeleton className="h-10 w-40" />
+        </CardFooter>
     </Card>
 );
 
@@ -59,6 +87,18 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -91,6 +131,45 @@ export default function ProfilePage() {
 
     fetchProfile();
   }, []);
+
+  const handlePasswordChange = async (data: ChangePasswordFormData) => {
+    setIsPasswordSubmitting(true);
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch('/api/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || 'Ocurrió un error.');
+        }
+
+        toast({
+            title: '¡Éxito!',
+            description: 'Tu contraseña ha sido actualizada.',
+        });
+        setIsDialogOpen(false);
+        form.reset();
+
+    } catch (e: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Error al cambiar la contraseña',
+            description: e.message,
+        });
+    } finally {
+        setIsPasswordSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -142,6 +221,78 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 </CardContent>
+                 <CardFooter>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">
+                                <KeyRound className="mr-2 h-4 w-4" />
+                                Cambiar Contraseña
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Cambiar Contraseña</DialogTitle>
+                                <DialogDescription>
+                                    Introduce tu contraseña actual y la nueva contraseña.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(handlePasswordChange)} className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="currentPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Contraseña Actual</FormLabel>
+                                                <FormControl>
+                                                    <Input type="password" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="newPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Nueva Contraseña</FormLabel>
+                                                <FormControl>
+                                                    <Input type="password" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="confirmPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Confirmar Nueva Contraseña</FormLabel>
+                                                <FormControl>
+                                                    <Input type="password" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button type="button" variant="secondary" disabled={isPasswordSubmitting}>
+                                                Cancelar
+                                            </Button>
+                                        </DialogClose>
+                                        <Button type="submit" disabled={isPasswordSubmitting}>
+                                            {isPasswordSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            Guardar Cambios
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
+                </CardFooter>
             </Card>
         )}
       </main>
