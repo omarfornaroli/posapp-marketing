@@ -78,7 +78,7 @@ export default function DashboardLayout({
         setProfile(profileData.profile);
         setIsAuthenticating(false);
 
-      } catch (error) {
+      } catch (error: any) {
         console.error('[Layout] Auth or profile fetch failed, redirecting to login.', error);
         localStorage.removeItem('token');
         router.replace('/login');
@@ -106,28 +106,20 @@ export default function DashboardLayout({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-2">
             {profile ? (
               <>
-                <Avatar>
+                <Avatar className="w-16 h-16">
                   <AvatarImage src={profile.avatar} />
                   <AvatarFallback>{profile.name?.charAt(0) ?? 'U'}</AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">{profile.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {profile.email}
-                  </span>
-                </div>
+                <span className="text-sm font-semibold text-center">{profile.name}</span>
               </>
             ) : (
-                <>
-                <Skeleton className="h-10 w-10 rounded-full" />
-                 <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col items-center gap-2">
+                    <Skeleton className="h-16 w-16 rounded-full" />
                     <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
                 </div>
-                </>
             )}
           </div>
         </SidebarHeader>
