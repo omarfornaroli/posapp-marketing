@@ -33,6 +33,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const verifyAuth = async () => {
+      console.log('[Layout] Verifying auth. Cookies available to JS:', document.cookie);
       try {
         const response = await fetch('/api/check-auth', {
           credentials: 'include', // Ensure cookies are sent with the request
