@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextResponse, type NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
 
-export async function GET() {
-  const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value;
+export async function GET(request: NextRequest) {
+  // The correct way to access cookies in an API Route is via the request object.
+  const token = request.cookies.get('token')?.value;
 
   if (!token) {
     return NextResponse.json({ isAuthenticated: false }, { status: 401 });
