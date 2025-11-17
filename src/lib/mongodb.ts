@@ -7,14 +7,14 @@ export async function connectToDatabase() {
     return cachedClient;
   }
   
-  const MONGO_URI = process.env.MONGO_URI;
+  const MONGODB_URI = process.env.MONGODB_URI;
 
-  if (!MONGO_URI) {
-    throw new Error('Please define the MONGO_URI environment variable inside .env or pass it at runtime');
+  if (!MONGODB_URI) {
+    throw new Error('Please define the MONGODB_URI environment variable inside .env or pass it at runtime');
   }
 
   try {
-    const client = await mongoose.connect(MONGO_URI!);
+    const client = await mongoose.connect(MONGODB_URI!);
     cachedClient = client;
     console.log('Connected to MongoDB');
     return client;
