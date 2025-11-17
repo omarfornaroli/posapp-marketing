@@ -49,8 +49,8 @@ export default function LoginPage() {
     const form = useForm<LoginData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            email: "",
-            password: "",
+            email: "admin@example.com",
+            password: "1234",
         }
     });
 
@@ -73,7 +73,7 @@ export default function LoginPage() {
                   title: "¡Éxito!",
                   description: "Has iniciado sesión correctamente. Redirigiendo...",
                 });
-                router.push('/dashboard');
+                window.location.href = '/dashboard';
             }
         } catch (e) {
             setError('No se pudo conectar con el servidor. Inténtalo de nuevo.');
