@@ -1,5 +1,5 @@
-import type {NextConfig} from 'next';
 require('dotenv').config({ path: './.env' });
+import type {NextConfig} from 'next';
 
 
 const nextConfig: NextConfig = {
@@ -25,10 +25,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  env: {
-    MONGODB_URI: process.env.MONGODB_URI,
-    JWT_SECRET: process.env.JWT_SECRET,
   },
 };
 

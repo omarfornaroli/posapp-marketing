@@ -13,6 +13,7 @@ services:
       - PORT=${PORT}
       # This is the connection string for the mongo service defined below.
       - MONGODB_URI=mongodb://mongo:27018/posapp-marketing
+      - JWT_SECRET=your-production-jwt-secret
       # Demo data is disabled for this Docker setup.
       # Change to 'true' if you want to load demo data on first run.
       - LOAD_DEMO_DATA=false
