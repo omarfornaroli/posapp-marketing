@@ -12,8 +12,6 @@ export async function middleware(request: NextRequest) {
   const secretString = process.env.JWT_SECRET;
   if (!secretString) {
     console.error('JWT_SECRET is not defined in environment variables');
-    // In a real scenario, you might want to redirect to an error page or just deny access
-    // For now, we'll redirect to login as if there's no valid session.
     if (isProtectedRoute) {
         const loginUrl = request.nextUrl.clone();
         loginUrl.pathname = '/login';
