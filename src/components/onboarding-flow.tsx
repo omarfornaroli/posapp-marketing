@@ -49,6 +49,18 @@ export default function OnboardingFlow() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const form = useForm<OnboardingData>({
+    resolver: zodResolver(OnboardingSchema),
+    defaultValues: {
+      businessName: '',
+      businessAddress: '',
+      businessIndustry: '',
+      email: '',
+      password: '',
+      termsOfServiceAgreement: false,
+    },
+  });
+
   const handleNext = async () => {
     const fieldsToValidate = stepFields[currentStep - 1];
     const isValid = await form.trigger(fieldsToValidate);
