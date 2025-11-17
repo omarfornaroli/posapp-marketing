@@ -23,6 +23,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SidebarMenuButton } from '@/components/ui/sidebar-dashboard';
 import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface UserProfile {
+  name: string;
+  email: string;
+  avatar: string;
+}
 
 export default function DashboardLayout({
   children,
@@ -32,42 +39,52 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndFetchProfile = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error(
-          '[Layout] Auth check failed, no token in localStorage. Redirecting to login.'
-        );
+        console.error('[Layout] Auth check failed, no token. Redirecting to login.');
         router.replace('/login');
         return;
       }
 
       try {
-        console.log('[Layout] Verifying auth with token from localStorage.');
-        const response = await fetch('/api/check-auth', {
+        console.log('[Layout] Verifying auth with token.');
+        const authResponse = await fetch('/api/check-auth', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        const data = await response.json();
+        const authData = await authResponse.json();
 
-        if (!data.isAuthenticated) {
-          throw new Error(data.reason || 'Not authenticated');
+        if (!authData.isAuthenticated) {
+          throw new Error(authData.reason || 'Not authenticated');
         }
+        
+        console.log('[Layout] Auth successful. Fetching profile.');
+        const profileResponse = await fetch('/api/profile', {
+           headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const profileData = await profileResponse.json();
+        if(!profileData.success) {
+            throw new Error(profileData.message || 'Could not fetch profile');
+        }
+        setProfile(profileData.profile);
         setIsAuthenticating(false);
+
       } catch (error) {
-        console.error(
-          '[Layout] Auth check failed, redirecting to login.',
-          error
-        );
+        console.error('[Layout] Auth or profile fetch failed, redirecting to login.', error);
         localStorage.removeItem('token');
         router.replace('/login');
       }
     };
-    checkAuth();
+    checkAuthAndFetchProfile();
   }, [router]);
 
   const handleLogout = async () => {
@@ -90,16 +107,28 @@ export default function DashboardLayout({
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Avatar>
-              <AvatarImage src="https://picsum.photos/seed/avatar/40/40" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">Usuario</span>
-              <span className="text-xs text-muted-foreground">
-                admin@example.com
-              </span>
-            </div>
+            {profile ? (
+              <>
+                <Avatar>
+                  <AvatarImage src={profile.avatar} />
+                  <AvatarFallback>{profile.name?.charAt(0) ?? 'U'}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">{profile.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {profile.email}
+                  </span>
+                </div>
+              </>
+            ) : (
+                <>
+                <Skeleton className="h-10 w-10 rounded-full" />
+                 <div className="flex flex-col gap-1.5">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                </div>
+                </>
+            )}
           </div>
         </SidebarHeader>
         <SidebarContent>
