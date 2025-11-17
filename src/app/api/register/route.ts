@@ -54,8 +54,12 @@ export async function POST(request: Request) {
     let message =
       'Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde.';
 
+    // Check for MongoDB duplicate key error (code 11000)
     if (error instanceof Error && (error as any).code === 11000) {
-      message = 'El email ya está en uso.';
+      message = 'El email ya está en uso. Por favor, intente con otro.';
+    } else if (error instanceof Error) {
+      // Capture a more specific message if available
+      message = error.message;
     }
     
     return NextResponse.json({success: false, message}, {status: 500});
