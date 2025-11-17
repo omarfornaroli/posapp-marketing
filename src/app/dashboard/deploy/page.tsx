@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -8,7 +9,18 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CircleDot, RefreshCw, Trash2, Power, AlertTriangle, CheckCircle } from 'lucide-react';
+import {
+  RefreshCw,
+  Trash2,
+  Power,
+  AlertTriangle,
+  CheckCircle,
+  Server,
+  Database,
+  Globe,
+  Loader2,
+} from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type DeployStatus = 'funcionando' | 'parado' | 'reiniciando';
 
@@ -41,14 +53,52 @@ const statusConfig: Record<
   },
 };
 
+interface Profile {
+    businessName: string;
+}
+
 export default function DeployPage() {
   const currentStatus: DeployStatus = 'funcionando';
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const response = await fetch('/api/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (data.success) {
+          setProfile(data.profile);
+        }
+      } catch (e) {
+        console.error("Failed to fetch profile", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const {
     text: statusText,
     icon: StatusIcon,
     color: statusColor,
     description: statusDescription,
   } = statusConfig[currentStatus];
+
+  const generateUrl = (name: string) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -71,6 +121,46 @@ export default function DeployPage() {
               <p className="text-xs text-muted-foreground pt-2">
                 {statusDescription}
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Información de Conexión</CardTitle>
+              <CardDescription>
+                Detalles para acceder a tu aplicación y base de datos.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoading ? (
+                <>
+                  <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-48" /></div>
+                  <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-40" /></div>
+                  <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-56" /></div>
+                </>
+              ) : (
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-3">
+                        <Server className="h-5 w-5 text-primary"/>
+                        <span className="font-semibold text-foreground">Puerto de la App:</span>
+                        <code className="bg-muted px-2 py-1 rounded-md">9003</code>
+                    </li>
+                     <li className="flex items-center gap-3">
+                        <Database className="h-5 w-5 text-primary"/>
+                        <span className="font-semibold text-foreground">Puerto de la DB:</span>
+                        <code className="bg-muted px-2 py-1 rounded-md">27028</code>
+                    </li>
+                    {profile?.businessName && (
+                      <li className="flex items-center gap-3">
+                          <Globe className="h-5 w-5 text-primary"/>
+                          <span className="font-semibold text-foreground">URL Base:</span>
+                          <code className="bg-muted px-2 py-1 rounded-md">{generateUrl(profile.businessName)}</code>
+                      </li>
+                    )}
+                </ul>
+              )}
             </CardContent>
           </Card>
         </div>
