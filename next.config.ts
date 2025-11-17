@@ -1,4 +1,6 @@
 import type {NextConfig} from 'next';
+require('dotenv').config({ path: './.env' });
+
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -25,7 +27,8 @@ const nextConfig: NextConfig = {
     ],
   },
   env: {
-    MONGO_URI: process.env.MONGO_URI,
+    MONGODB_URI: process.env.MONGODB_URI,
+    JWT_SECRET: process.env.JWT_SECRET,
   },
 };
 
