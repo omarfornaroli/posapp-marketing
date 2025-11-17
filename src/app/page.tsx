@@ -1,32 +1,49 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, BarChart, ShoppingCart, Users } from 'lucide-react';
+import { BarChart, ShoppingCart, Users } from 'lucide-react';
 import Header from '@/components/header';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 export default function LandingPage() {
-  const appTitle = process.env.APP_TITLE || 'VentaConnect';
+  const appTitle = 'Posify';
+  const heroImage = placeholderImages.find(p => p.id === 'hero');
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="text-center py-20 sm:py-32 bg-card">
-          <div className="container mx-auto px-4">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary mb-4">
-              La Solución Definitiva para la Gestión de tu Negocio
-            </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              {appTitle} es el software de punto de venta (POS) y gestión comercial que simplifica tus operaciones, optimiza tu inventario y potencia tus ventas.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Button asChild size="lg" className="bg-accent hover:bg-accent/90">
-                <Link href="/register">Comenzar Gratis</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="#">Solicitar Demo</Link>
-              </Button>
+        <section className="bg-card">
+          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center py-20 sm:py-32">
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary mb-4">
+                La Solución Definitiva para la Gestión de tu Negocio
+              </h1>
+              <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto md:mx-0">
+                {appTitle} es el software de punto de venta (POS) y gestión comercial que simplifica tus operaciones, optimiza tu inventario y potencia tus ventas.
+              </p>
+              <div className="flex justify-center md:justify-start gap-4">
+                <Button asChild size="lg" className="bg-accent hover:bg-accent/90">
+                  <Link href="/register">Comenzar Gratis</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="#">Solicitar Demo</Link>
+                </Button>
+              </div>
             </div>
+            {heroImage && (
+              <div className="relative h-64 md:h-full w-full rounded-lg overflow-hidden order-first md:order-last">
+                 <Image
+                    src={heroImage.src}
+                    alt={heroImage.alt}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={heroImage.hint}
+                  />
+              </div>
+            )}
           </div>
         </section>
 

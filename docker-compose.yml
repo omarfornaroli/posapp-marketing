@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ventaconnect-app
+    container_name: posify-app
     ports:
       - "9003:3000"
     environment:
@@ -24,27 +24,23 @@ services:
     depends_on:
       - mongo
     networks:
-      - ventaconnect-net
+      - posify-net
     restart: unless-stopped
 
   mongo:
     image: mongo:latest
-    container_name: ventaconnect-mongo
+    container_name: posify-mongo
     ports:
       - "27018:27017"
     volumes:
       - marketing-mongo-data:/data/db
     networks:
-      - ventaconnect-net
+      - posify-net
     restart: unless-stopped
 
 networks:
-  ventaconnect-net:
+  posify-net:
     driver: bridge
-
-volumes:
-  marketing-mongo-data:
-    driver: local
 
 volumes:
   marketing-mongo-data:

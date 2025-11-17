@@ -1,0 +1,14 @@
+[
+  {
+    "id": "hero",
+    "src": "https://picsum.photos/seed/hero/1200/800",
+    "alt": "A modern point of sale system in a stylish retail environment.",
+    "hint": "retail store"
+  },
+  {
+    "id": "login",
+    "src": "https://picsum.photos/seed/login/800/1200",
+    "alt": "Abstract purple and blue geometric shapes.",
+    "hint": "abstract purple"
+  }
+]

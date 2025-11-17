@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Package } from 'lucide-react';
 
 export default function Header() {
-  const appTitle = process.env.APP_TITLE || 'VentaConnect';
+  const appTitle = 'Posify';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -19,7 +19,7 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="flex items-center space-x-2">
             <Button asChild variant="ghost">
-              <Link href="#">Iniciar Sesión</Link>
+              <Link href="/login">Iniciar Sesión</Link>
             </Button>
             <Button asChild>
               <Link href="/register">Registrarse</Link>

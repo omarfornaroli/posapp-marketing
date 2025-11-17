@@ -1,16 +1,24 @@
-FROM node:20-alpine
-
-# Definimos el directorio de trabajo
+# 1. Install dependencies only when needed
+FROM node:20-alpine AS deps
 WORKDIR /app
+COPY package.json ./
+RUN npm install
 
-# Exponemos el puerto de la app
-EXPOSE 3000
-
-# Copiamos package.json y package-lock.json primero para aprovechar la cache
-COPY package*.json ./
-
-# Copiamos el resto del proyecto
+# 2. Rebuild the source code only when needed
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npm run build
 
-# Instalamos dependencias
-CMD ["sh", "-c", "npm install && npm run build && npm run start"]
+# 3. Production image, copy all the files and run next
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/public ./public
+
+EXPOSE 3000
+CMD ["npm", "run", "start"]

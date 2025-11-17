@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 export default function RegisterPage() {
-  const appTitle = process.env.APP_TITLE || "VentaConnect";
+  const appTitle = "Posify";
   return (
     <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative">
        <Button asChild variant="ghost" className="absolute top-4 left-4 sm:top-6 sm:left-6">

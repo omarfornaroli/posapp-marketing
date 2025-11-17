@@ -118,7 +118,7 @@ export default function OnboardingFlow() {
               <FormItem><FormLabel>Email (Opcional)</FormLabel><FormControl><Input placeholder="admin@example.com" {...field} /></FormControl><FormDescription>Si lo dejas en blanco, se usará 'admin@example.com'.</FormDescription><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="password" render={({ field }) => (
-              <FormItem><FormLabel>Contraseña (Opcional)</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormDescription>Si lo dejas en blanco, se usará una contraseña por defecto. Si la ingresas, debe tener al menos 8 caracteres, mayúscula, minúscula, número y un símbolo.</FormDescription><FormMessage /></FormItem>
+              <FormItem><FormLabel>Contraseña (Opcional)</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormDescription>Si lo dejas en blanco, se usará '1234'. Si la ingresas, debe tener al menos 8 caracteres, mayúscula, minúscula, número y un símbolo.</FormDescription><FormMessage /></FormItem>
             )} />
           </div>
         )}
@@ -155,7 +155,7 @@ export default function OnboardingFlow() {
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
               <PartyPopper className="w-16 h-16 mx-auto text-accent" />
             </motion.div>
-            <h2 className="mt-6 text-2xl sm:text-3xl font-bold text-primary">¡Bienvenido a VentaConnect!</h2>
+            <h2 className="mt-6 text-2xl sm:text-3xl font-bold text-primary">¡Bienvenido a Posify!</h2>
             <p className="mt-2 text-base sm:text-lg text-muted-foreground">Su cuenta ha sido creada exitosamente.</p>
             <Card className="mt-6 sm:mt-8 text-left">
               <CardHeader>

@@ -6,7 +6,7 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: process.env.APP_TITLE || 'VentaConnect',
+  title: 'Posify',
   description: 'El sistema POS para llevar tu negocio al siguiente nivel.',
 };
 
