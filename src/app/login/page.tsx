@@ -1,6 +1,8 @@
 
 'use client';
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -26,35 +27,64 @@ import { z } from "zod";
 import Link from "next/link";
 import Image from "next/image";
 import placeholderImages from '@/lib/placeholder-images.json';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 
 const loginSchema = z.object({
   email: z.string().email("El email no es válido."),
   password: z.string().min(1, "La contraseña es requerida."),
-  remember: z.boolean().optional(),
 });
 
 type LoginData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+    const router = useRouter();
+    const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const loginImage = placeholderImages.find(p => p.id === 'login');
+
     const form = useForm<LoginData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
             email: "",
             password: "",
-            remember: false,
         }
     });
 
-    const onSubmit = (data: LoginData) => {
-        console.log(data);
-        // Handle login logic here
+    const onSubmit = async (data: LoginData) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                setError(result.message || 'Error al iniciar sesión.');
+            } else {
+                toast({
+                  title: "¡Éxito!",
+                  description: "Has iniciado sesión correctamente. Redirigiendo...",
+                });
+                router.push('/dashboard');
+            }
+        } catch (e) {
+            setError('No se pudo conectar con el servidor. Inténtalo de nuevo.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="grid md:grid-cols-2 max-w-6xl w-full rounded-lg shadow-2xl overflow-hidden">
+      <div className="grid md:grid-cols-2 max-w-6xl w-full rounded-lg shadow-2xl overflow-hidden bg-card">
         <div className="hidden md:block relative h-full">
             {loginImage && (
                 <Image 
@@ -66,7 +96,7 @@ export default function LoginPage() {
                 />
             )}
         </div>
-        <div className="flex items-center justify-center p-8 sm:p-12 bg-card">
+        <div className="flex items-center justify-center p-8 sm:p-12">
             <Card className="w-full max-w-md border-0 shadow-none">
                 <CardHeader className="text-center">
                     <CardTitle className="text-3xl font-bold text-primary">Inicia Sesión en Tu Cuenta</CardTitle>
@@ -75,6 +105,13 @@ export default function LoginPage() {
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        {error && (
+                          <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                          </Alert>
+                        )}
                         <FormField
                             control={form.control}
                             name="email"
@@ -82,7 +119,7 @@ export default function LoginPage() {
                             <FormItem>
                                 <FormLabel>Correo Electrónico</FormLabel>
                                 <FormControl>
-                                <Input placeholder="nombre@ejemplo.com" {...field} />
+                                <Input placeholder="nombre@ejemplo.com" {...field} disabled={isLoading} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -95,36 +132,20 @@ export default function LoginPage() {
                             <FormItem>
                                 <FormLabel>Contraseña</FormLabel>
                                 <FormControl>
-                                <Input type="password" placeholder="Ingresa tu contraseña" {...field} />
+                                <Input type="password" placeholder="Ingresa tu contraseña" {...field} disabled={isLoading} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                             )}
                         />
-                        <div className="flex items-center justify-between text-sm">
-                            <FormField
-                                control={form.control}
-                                name="remember"
-                                render={({ field }) => (
-                                <FormItem className="flex items-center space-x-2">
-                                    <FormControl>
-                                        <Checkbox
-                                            id="remember"
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                    <FormLabel htmlFor="remember" className="!mt-0 font-normal text-muted-foreground">
-                                    Recordarme por 15 días
-                                    </FormLabel>
-                                </FormItem>
-                                )}
-                            />
+                        <div className="flex items-center justify-end text-sm">
                             <Link href="#" className="font-medium text-accent hover:underline">
                                 ¿Olvidaste la contraseña?
                             </Link>
                         </div>
-                        <Button type="submit" className="w-full bg-accent hover:bg-accent/90">Iniciar Sesión</Button>
+                        <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
+                          {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Procesando...</> : "Iniciar Sesión"}
+                        </Button>
                         </form>
                     </Form>
                 </CardContent>
