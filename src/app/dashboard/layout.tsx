@@ -21,22 +21,7 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { SidebarMenuButton } from '@/components/ui/sidebar';
-
-// This function can be moved to a lib file if needed
-async function checkAuthStatus() {
-  try {
-    // We check for a session by looking for the token cookie.
-    // The presence of the cookie is checked on the server-side.
-    const response = await fetch('/api/check-auth'); // This API route needs to exist
-    if (!response.ok) return { isAuthenticated: false };
-    const data = await response.json();
-    return { isAuthenticated: data.isAuthenticated };
-  } catch (error) {
-    console.error('Auth check failed:', error);
-    return { isAuthenticated: false };
-  }
-}
+import { SidebarMenuButton } from '@/components/ui/sidebar-dashboard';
 
 export default function DashboardLayout({
   children,
@@ -48,12 +33,21 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const verifyAuth = async () => {
-      // A simple check for a token cookie. In a real app, you'd verify it.
-      const hasToken = document.cookie.includes('token=');
-      if (!hasToken) {
+      try {
+        const response = await fetch('/api/check-auth');
+        if (!response.ok) {
+          router.replace('/login');
+          return;
+        }
+        const data = await response.json();
+        if (!data.isAuthenticated) {
+          router.replace('/login');
+        } else {
+          setIsAuthenticating(false);
+        }
+      } catch (error) {
+        console.error('Authentication check failed:', error);
         router.replace('/login');
-      } else {
-        setIsAuthenticating(false);
       }
     };
     verifyAuth();
@@ -63,11 +57,9 @@ export default function DashboardLayout({
   const handleLogout = async () => {
     const response = await fetch('/api/logout', { method: 'POST' });
     if (response.ok) {
-      // Use replace to prevent going back to the dashboard via browser history
       router.replace('/login');
     } else {
       console.error('Failed to log out');
-      // Optionally show a toast notification for the error
     }
   };
 
