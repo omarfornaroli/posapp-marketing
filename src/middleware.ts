@@ -6,51 +6,56 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
   const {pathname} = request.nextUrl;
 
-  const isProtectedRoute = pathname.startsWith('/dashboard');
   const isAuthRoute = pathname === '/login' || pathname === '/register';
+  const isProtectedRoute = pathname.startsWith('/dashboard');
+  const secret = new TextEncoder().encode(
+    process.env.JWT_SECRET || 'your-fallback-secret'
+  );
 
-  if (!token) {
-    if (isProtectedRoute) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      return NextResponse.redirect(url);
+  // If trying to access a protected route
+  if (isProtectedRoute) {
+    if (!token) {
+      // No token, redirect to login
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/login';
+      return NextResponse.redirect(loginUrl);
     }
-    return NextResponse.next();
+
+    try {
+      // Verify token
+      await jose.jwtVerify(token, secret);
+      // Token is valid, allow access
+      return NextResponse.next();
+    } catch (error) {
+      // Token is invalid, redirect to login and clear the corrupt cookie
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/login';
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.set('token', '', {path: '/', expires: new Date(0)});
+      return response;
+    }
   }
 
-  // If we have a token, verify it
-  try {
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'your-fallback-secret'
-    );
-    await jose.jwtVerify(token, secret);
-
-    // If user is authenticated and tries to access login/register, redirect to dashboard
-    if (isAuthRoute) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
+  // If trying to access an auth route (login/register)
+  if (isAuthRoute) {
+    if (token) {
+      try {
+        // If there's a valid token, user is already logged in
+        await jose.jwtVerify(token, secret);
+        // Redirect to dashboard
+        const dashboardUrl = request.nextUrl.clone();
+        dashboardUrl.pathname = '/dashboard';
+        return NextResponse.redirect(dashboardUrl);
+      } catch (error) {
+        // Token is invalid, allow access to auth route but clear cookie
+        const response = NextResponse.next();
+        response.cookies.set('token', '', {path: '/', expires: new Date(0)});
+        return response;
+      }
     }
-
-    return NextResponse.next();
-  } catch (error) {
-    // Token is invalid, clear it and redirect to login if on a protected route
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    const response = isProtectedRoute ? NextResponse.redirect(url) : NextResponse.next();
-    
-    response.cookies.set('token', '', {
-      httpOnly: true,
-      path: '/',
-      expires: new Date(0),
-    });
-
-    if(isProtectedRoute){
-        return NextResponse.redirect(url);
-    }
-
-    return response;
   }
+
+  return NextResponse.next();
 }
 
 export const config = {
