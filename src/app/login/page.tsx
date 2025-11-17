@@ -66,14 +66,17 @@ export default function LoginPage() {
 
             const result = await response.json();
 
-            if (!response.ok) {
+            if (!response.ok || !result.success) {
                 setError(result.message || 'Error al iniciar sesión.');
             } else {
                 toast({
                   title: "¡Éxito!",
                   description: "Has iniciado sesión correctamente. Redirigiendo...",
                 });
-                window.location.href = '/dashboard';
+                // Redirect using the URL from the API response
+                if (result.redirectTo) {
+                  window.location.href = result.redirectTo;
+                }
             }
         } catch (e) {
             setError('No se pudo conectar con el servidor. Inténtalo de nuevo.');
