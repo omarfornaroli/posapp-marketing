@@ -16,10 +16,12 @@ import {
   CreditCard,
   User,
   LogOut,
+  Loader2,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SidebarMenuButton } from '@/components/ui/sidebar-dashboard';
+import { useEffect, useState } from 'react';
 
 export default function DashboardLayout({
   children,
@@ -27,6 +29,27 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        console.log('[Layout] Verifying auth. Cookies available to JS:', document.cookie);
+        const response = await fetch('/api/check-auth', { credentials: 'include' });
+        if (!response.ok) {
+          throw new Error('Not authenticated');
+        }
+        const data = await response.json();
+        if (!data.isAuthenticated) {
+          throw new Error('Not authenticated');
+        }
+        setIsAuthenticating(false);
+      } catch (error) {
+        router.replace('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleLogout = async () => {
     const response = await fetch('/api/logout', { method: 'POST' });
@@ -36,6 +59,14 @@ export default function DashboardLayout({
       console.error('Failed to log out');
     }
   };
+
+  if (isAuthenticating) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
