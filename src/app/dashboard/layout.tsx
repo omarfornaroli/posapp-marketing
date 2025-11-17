@@ -34,7 +34,9 @@ export default function DashboardLayout({
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        const response = await fetch('/api/check-auth');
+        const response = await fetch('/api/check-auth', {
+          credentials: 'include', // Ensure cookies are sent with the request
+        });
         if (!response.ok) {
           router.replace('/login');
           return;
