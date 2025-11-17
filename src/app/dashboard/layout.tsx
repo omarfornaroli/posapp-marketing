@@ -1,5 +1,4 @@
 'use client';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Sidebar,
@@ -17,7 +16,6 @@ import {
   CreditCard,
   User,
   LogOut,
-  Loader2,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -29,32 +27,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [isAuthenticating, setIsAuthenticating] = useState(true);
-
-  useEffect(() => {
-    const verifyAuth = async () => {
-      try {
-        const response = await fetch('/api/check-auth', {
-          credentials: 'include', // Ensure cookies are sent with the request
-        });
-        if (!response.ok) {
-          router.replace('/login');
-          return;
-        }
-        const data = await response.json();
-        if (!data.isAuthenticated) {
-          router.replace('/login');
-        } else {
-          setIsAuthenticating(false);
-        }
-      } catch (error) {
-        console.error('Authentication check failed:', error);
-        router.replace('/login');
-      }
-    };
-    verifyAuth();
-  }, [router]);
-
 
   const handleLogout = async () => {
     const response = await fetch('/api/logout', { method: 'POST' });
@@ -64,14 +36,6 @@ export default function DashboardLayout({
       console.error('Failed to log out');
     }
   };
-
-  if (isAuthenticating) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <SidebarProvider>
