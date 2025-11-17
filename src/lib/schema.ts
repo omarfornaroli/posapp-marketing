@@ -9,23 +9,31 @@ export const OnboardingSchema = z.object({
   businessIndustry: z.string().optional(),
 
   // Step 2
-  userName: z
-    .string()
-    .min(2, "El nombre de usuario debe tener al menos 2 caracteres."),
-  password: z.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, "La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial."),
-  confirmPassword: z.string(),
+  email: z.string().email("El email no es válido.").optional().or(z.literal('')),
+  password: z.string().optional().or(z.literal('')),
+  confirmPassword: z.string().optional().or(z.literal('')),
 
   // Step 3
-  cardHolderName: z.string().min(2, "El nombre del titular es requerido."),
-  cardNumber: z.string().regex(/^[0-9]{16}$/, "Número de tarjeta inválido."),
-  cardExpiry: z.string().regex(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/, "Fecha de vencimiento inválida (MM/YY)."),
-  cardCVC: z.string().regex(/^[0-9]{3,4}$/, "CVC inválido."),
   termsOfServiceAgreement: z.literal<boolean>(true, {
     errorMap: () => ({ message: "Debe aceptar los términos y condiciones." }),
   }),
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine((data) => {
+  if (data.password || data.confirmPassword) {
+    return data.password === data.confirmPassword;
+  }
+  return true;
+}, {
   message: "Las contraseñas no coinciden.",
   path: ["confirmPassword"],
+}).refine(data => {
+  if (data.email && data.password) {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(data.password);
+  }
+  return true;
+}, {
+    message: "La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.",
+    path: ["password"],
 });
+
 
 export type OnboardingData = z.infer<typeof OnboardingSchema>;

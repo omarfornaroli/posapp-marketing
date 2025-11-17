@@ -34,8 +34,8 @@ const steps = [
 
 const stepFields: FieldName<OnboardingData>[][] = [
   ["businessName", "businessAddress", "businessIndustry"],
-  ["userName", "password", "confirmPassword"],
-  ["cardHolderName", "cardNumber", "cardExpiry", "cardCVC", "termsOfServiceAgreement"],
+  ["email", "password", "confirmPassword"],
+  ["termsOfServiceAgreement"],
 ];
 
 export default function OnboardingFlow() {
@@ -50,15 +50,12 @@ export default function OnboardingFlow() {
       businessName: "",
       businessAddress: "",
       businessIndustry: "",
-      userName: "",
+      email: "",
       password: "",
       confirmPassword: "",
-      cardHolderName: "",
-      cardNumber: "",
-      cardExpiry: "",
-      cardCVC: "",
       termsOfServiceAgreement: false,
     },
+    mode: "onBlur",
   });
 
   const handleNext = async () => {
@@ -78,7 +75,7 @@ export default function OnboardingFlow() {
     setError(null);
     try {
       const result = await processOnboarding(data);
-      if (result.success && result.recommendations) {
+      if (result.success) {
         setRecommendations(result.recommendations);
         setCurrentStep(4);
       } else {
@@ -118,11 +115,11 @@ export default function OnboardingFlow() {
 
         {currentStep === 2 && (
           <div className="space-y-4 md:space-y-6">
-            <FormField control={form.control} name="userName" render={({ field }) => (
-              <FormItem><FormLabel>Nombre de Usuario</FormLabel><FormControl><Input placeholder="Ej: juanperez" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormField control={form.control} name="email" render={({ field }) => (
+              <FormItem><FormLabel>Email (Opcional)</FormLabel><FormControl><Input placeholder="admin@example.com" {...field} /></FormControl><FormDescription>Si lo dejas en blanco, se usará 'admin@example.com'.</FormDescription><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="password" render={({ field }) => (
-              <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormDescription>Debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.</FormDescription><FormMessage /></FormItem>
+              <FormItem><FormLabel>Contraseña (Opcional)</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormDescription>Si lo dejas en blanco, se usará una contraseña por defecto. Si la ingresas, debe tener al menos 8 caracteres, mayúscula, minúscula, número y un símbolo.</FormDescription><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="confirmPassword" render={({ field }) => (
                 <FormItem><FormLabel>Confirmar Contraseña</FormLabel><FormControl><Input type="password" placeholder="********" {...field} /></FormControl><FormMessage /></FormItem>
@@ -137,20 +134,13 @@ export default function OnboardingFlow() {
                     <CardTitle className="text-xl sm:text-2xl">Suscripción a Mercado Pago</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <FormField control={form.control} name="cardHolderName" render={({ field }) => (
-                      <FormItem><FormLabel>Nombre del titular de la tarjeta</FormLabel><FormControl><Input placeholder="Ej: Juan Perez" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="cardNumber" render={({ field }) => (
-                      <FormItem><FormLabel>Número de Tarjeta</FormLabel><FormControl><Input placeholder="**** **** **** ****" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField control={form.control} name="cardExpiry" render={({ field }) => (
-                          <FormItem><FormLabel>Vencimiento</FormLabel><FormControl><Input placeholder="MM/YY" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="cardCVC" render={({ field }) => (
-                          <FormItem><FormLabel>CVC</FormLabel><FormControl><Input placeholder="123" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
+                    <p className="text-muted-foreground">
+                        Haz clic en el botón a continuación para configurar tu suscripción a través de Mercado Pago. Serás redirigido a su plataforma segura para completar el proceso.
+                    </p>
+                    <Button className="w-full bg-[#009EE3] hover:bg-[#008ACB]">
+                        <CreditCard className="mr-2" />
+                        Suscribirse con Mercado Pago
+                    </Button>
                 </CardContent>
             </Card>
             <FormField control={form.control} name="termsOfServiceAgreement" render={({ field }) => (
