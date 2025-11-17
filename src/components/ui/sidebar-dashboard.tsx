@@ -492,18 +492,6 @@ const SidebarMenuButton = React.forwardRef<
       </>
     );
 
-    const button = (
-      <Comp
-        ref={ref}
-        data-sidebar="menu-button"
-        data-size={size}
-        data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({variant, size}), className)}
-        {...props}
-      >
-        {buttonContent}
-      </Comp>
-    );
     const Comp = asChild ? Slot : 'button';
 
     const renderButton = () => {

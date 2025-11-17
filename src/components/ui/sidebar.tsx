@@ -4,6 +4,8 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import { usePathname } from 'next/navigation';
+import NextLink from 'next/link';
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -535,36 +537,45 @@ const sidebarMenuButtonVariants = cva(
 
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<"button"> & {
+  React.ComponentProps<'a'> & {
     asChild?: boolean
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
+    href?: string
   } & VariantProps<typeof sidebarMenuButtonVariants>
 >(
   (
     {
       asChild = false,
-      isActive = false,
+      isActive: isActiveProp,
       variant = "default",
       size = "default",
       tooltip,
       className,
+      href,
+      children,
       ...props
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : "button"
+    const Comp = asChild ? Slot : "a"
     const { isMobile, state } = useSidebar()
+    const pathname = usePathname();
+    const isActive = isActiveProp ?? (href ? pathname === href : false);
 
     const button = (
-      <Comp
-        ref={ref}
-        data-sidebar="menu-button"
-        data-size={size}
-        data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...props}
-      />
+      <NextLink href={href || '#'} passHref legacyBehavior>
+        <Comp
+          ref={ref}
+          data-sidebar="menu-button"
+          data-size={size}
+          data-active={isActive}
+          className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+          {...props}
+        >
+          {children}
+        </Comp>
+      </NextLink>
     )
 
     if (!tooltip) {

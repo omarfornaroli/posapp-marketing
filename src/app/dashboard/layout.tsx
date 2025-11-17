@@ -2,32 +2,24 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
   SidebarHeader,
-  SidebarInset,
-  SidebarItem,
-  SidebarFooter,
-  SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
+  SidebarMenu,
+  SidebarFooter,
   SidebarProvider,
-  SidebarTrigger,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
+  SidebarInset,
 } from '@/components/ui/sidebar-dashboard';
 import {
-  Bell,
   Home,
-  Settings,
-  User,
-  LogOut,
   Rocket,
   CreditCard,
+  User,
+  LogOut,
 } from 'lucide-react';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from '@/components/ui/button';
 import {useRouter} from 'next/navigation';
+import { SidebarMenuButton } from '@/components/ui/sidebar';
 
 export default function DashboardLayout({
   children,
