@@ -36,15 +36,17 @@ export default function DashboardLayout({
       try {
         console.log('[Layout] Verifying auth. Cookies available to JS:', document.cookie);
         const response = await fetch('/api/check-auth', { credentials: 'include' });
-        if (!response.ok) {
-          throw new Error('Not authenticated');
-        }
+        
+        // We no longer check response.ok, as it will always be 200
         const data = await response.json();
+        console.log('[Layout] Auth check response from API:', data);
+
         if (!data.isAuthenticated) {
-          throw new Error('Not authenticated');
+          throw new Error(data.reason || 'Not authenticated');
         }
         setIsAuthenticating(false);
       } catch (error) {
+        console.error('[Layout] Auth check failed, redirecting to login.', error);
         router.replace('/login');
       }
     };
