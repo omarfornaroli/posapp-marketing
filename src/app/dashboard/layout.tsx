@@ -1,5 +1,5 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -11,17 +11,27 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar-dashboard';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   Home,
   Rocket,
   CreditCard,
   User,
   LogOut,
   Loader2,
+  ChevronDown,
+  CircleDot,
+  RefreshCw,
+  Trash2,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SidebarMenuButton } from '@/components/ui/sidebar-dashboard';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({
   children,
@@ -29,34 +39,39 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isAuthenticating, setIsAuthenticating] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('[Layout] Auth check failed, no token in localStorage. Redirecting to login.');
+        console.error(
+          '[Layout] Auth check failed, no token in localStorage. Redirecting to login.'
+        );
         router.replace('/login');
         return;
       }
-      
+
       try {
         console.log('[Layout] Verifying auth with token from localStorage.');
         const response = await fetch('/api/check-auth', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         const data = await response.json();
-        console.log('[Layout] Auth check response from API:', data);
 
         if (!data.isAuthenticated) {
           throw new Error(data.reason || 'Not authenticated');
         }
         setIsAuthenticating(false);
       } catch (error) {
-        console.error('[Layout] Auth check failed, redirecting to login.', error);
+        console.error(
+          '[Layout] Auth check failed, redirecting to login.',
+          error
+        );
         localStorage.removeItem('token');
         router.replace('/login');
       }
@@ -76,6 +91,8 @@ export default function DashboardLayout({
       </div>
     );
   }
+
+  const isActive = (path: string) => pathname === path;
 
   return (
     <SidebarProvider>
@@ -99,27 +116,66 @@ export default function DashboardLayout({
             <SidebarMenuItem>
               <SidebarMenuButton
                 href="/dashboard"
-                isActive={true}
+                isActive={isActive('/dashboard')}
                 tooltip="Dashboard"
               >
                 <Home />
                 <span>Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
+            <Collapsible>
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <button
+                    className={cn(
+                      'flex w-full items-center justify-between gap-3 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2',
+                      isActive('/dashboard/deploy') &&
+                        'bg-sidebar-primary font-medium text-sidebar-primary-foreground'
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Rocket />
+                      <span>Estado del Deploy</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                  </button>
+                </CollapsibleTrigger>
+              </SidebarMenuItem>
+              <CollapsibleContent>
+                <div className="flex flex-col gap-1 py-1 pl-11 pr-2">
+                  <SidebarMenuButton href="/dashboard/deploy" size="sm" variant="ghost">
+                      <CircleDot className="h-3 w-3" />
+                      <span>Ver Estado</span>
+                  </SidebarMenuButton>
+                  <SidebarMenuButton href="#" size="sm" variant="ghost">
+                      <RefreshCw className="h-3 w-3" />
+                      <span>Reiniciar Deploy</span>
+                  </SidebarMenuButton>
+                  <SidebarMenuButton href="#" size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-3 w-3" />
+                      <span>Borrar DB</span>
+                  </SidebarMenuButton>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Estado del Deploy">
-                <Rocket />
-                <span>Estado del Deploy</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Suscripción">
+              <SidebarMenuButton
+                href="/dashboard/subscription"
+                isActive={isActive('/dashboard/subscription')}
+                tooltip="Suscripción"
+              >
                 <CreditCard />
                 <span>Suscripción</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Perfil">
+              <SidebarMenuButton
+                href="/dashboard/profile"
+                isActive={isActive('/dashboard/profile')}
+                tooltip="Perfil"
+              >
                 <User />
                 <span>Perfil</span>
               </SidebarMenuButton>
