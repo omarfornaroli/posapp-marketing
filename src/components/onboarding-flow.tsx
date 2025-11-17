@@ -22,8 +22,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StepIndicator } from "@/components/step-indicator";
-import { processOnboarding } from "@/lib/actions";
-import type { SubscriptionRecommendationsOutput } from "@/ai/flows/generate-subscription-recommendations";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,7 +43,6 @@ export default function OnboardingFlow() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [recommendations, setRecommendations] = useState<SubscriptionRecommendationsOutput | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -65,7 +62,11 @@ export default function OnboardingFlow() {
     const fieldsToValidate = stepFields[currentStep - 1];
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
-      setCurrentStep((prev) => prev + 1);
+      if(currentStep === 3) {
+        await onSubmit(form.getValues());
+      } else {
+        setCurrentStep((prev) => prev + 1);
+      }
     }
   };
 
@@ -77,7 +78,15 @@ export default function OnboardingFlow() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await processOnboarding(data);
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        const result = await response.json();
+
       if (result.success) {
         toast({
             title: "¡Registro Exitoso!",
@@ -156,35 +165,6 @@ export default function OnboardingFlow() {
             )} />
           </div>
         )}
-
-        {currentStep === 4 && recommendations && (
-          <div className="text-center">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
-              <PartyPopper className="w-16 h-16 mx-auto text-accent" />
-            </motion.div>
-            <h2 className="mt-6 text-2xl sm:text-3xl font-bold text-primary">¡Bienvenido a Posify!</h2>
-            <p className="mt-2 text-base sm:text-lg text-muted-foreground">Su cuenta ha sido creada exitosamente.</p>
-            <Card className="mt-6 sm:mt-8 text-left">
-              <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl">Recomendación de Suscripción</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-sm sm:text-base">
-                <div>
-                  <h4 className="font-semibold">Nivel de Precio Recomendado:</h4>
-                  <p className="text-accent font-bold text-base sm:text-lg">{recommendations.recommendedPriceLevel}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold">Duración de Contrato Sugerida:</h4>
-                  <p className="text-accent font-bold text-base sm:text-lg">{recommendations.recommendedContractLength}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold">Justificación:</h4>
-                  <p className="text-muted-foreground text-xs sm:text-sm">{recommendations.justification}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </motion.div>
     </AnimatePresence>
   );
@@ -192,7 +172,7 @@ export default function OnboardingFlow() {
   return (
     <Card className="w-full">
       <CardContent className="p-4 sm:p-6 md:p-8">
-        <StepIndicator steps={steps} currentStep={currentStep} />
+        <StepIndicator steps={steps.slice(0, 3)} currentStep={currentStep} />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {error && (
@@ -205,22 +185,15 @@ export default function OnboardingFlow() {
             <div className="min-h-[380px] sm:min-h-[420px] flex flex-col justify-center px-2 sm:px-0">
               {formContent}
             </div>
-            {currentStep < 4 && (
-              <CardFooter className="flex justify-between p-0 pt-6 sm:pt-8">
-                <Button type="button" variant="outline" onClick={handleBack} disabled={currentStep === 1 || isLoading}>
-                  Atrás
-                </Button>
-                {currentStep < 3 ? (
-                  <Button type="button" onClick={handleNext} disabled={isLoading} className="bg-accent hover:bg-accent/90">
-                    Siguiente
-                  </Button>
-                ) : (
-                  <Button type="submit" disabled={!form.watch('termsOfServiceAgreement') || isLoading} className="bg-accent hover:bg-accent/90">
-                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finalizando...</> : 'Finalizar Registro'}
-                  </Button>
-                )}
-              </CardFooter>
-            )}
+
+            <CardFooter className="flex justify-between p-0 pt-6 sm:pt-8">
+              <Button type="button" variant="outline" onClick={handleBack} disabled={currentStep === 1 || isLoading}>
+                Atrás
+              </Button>
+              <Button type="button" onClick={handleNext} disabled={isLoading || (currentStep === 3 && !form.watch('termsOfServiceAgreement'))} className="bg-accent hover:bg-accent/90">
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finalizando...</> : (currentStep === 3 ? 'Finalizar Registro' : 'Siguiente')}
+              </Button>
+            </CardFooter>
           </form>
         </Form>
       </CardContent>
