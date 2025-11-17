@@ -4,11 +4,12 @@ import jwt from 'jsonwebtoken';
 export async function GET(request: NextRequest) {
   console.log('[API Check-Auth] Request received.');
   
-  const token = request.cookies.get('token')?.value;
+  const authHeader = request.headers.get('authorization');
+  const token = authHeader?.split(' ')[1];
 
   if (!token) {
-    console.log('[API Check-Auth] Token not found in cookies.');
-    return NextResponse.json({ isAuthenticated: false, reason: 'Token not found' }, { status: 200 });
+    console.log('[API Check-Auth] Token not found in Authorization header.');
+    return NextResponse.json({ isAuthenticated: false, reason: 'Token not found' });
   }
 
   console.log('[API Check-Auth] Token found:', token.substring(0, 15) + '...');
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
         console.error('[API Check-Auth] JWT_SECRET is not configured on the server.');
-        return NextResponse.json({ isAuthenticated: false, reason: 'Server not configured' }, { status: 200 });
+        return NextResponse.json({ isAuthenticated: false, reason: 'Server not configured' });
     }
     console.log('[API Check-Auth] Verifying token with secret.');
     jwt.verify(token, secret);
@@ -25,7 +26,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ isAuthenticated: true });
   } catch (error: any) {
     console.error('[API Check-Auth] Token verification failed:', error.message);
-    // Token is invalid or expired
-    return NextResponse.json({ isAuthenticated: false, reason: 'Token invalid or expired' }, { status: 200 });
+    return NextResponse.json({ isAuthenticated: false, reason: 'Token invalid or expired' });
   }
 }

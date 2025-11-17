@@ -73,6 +73,11 @@ export default function LoginPage() {
                   title: "¡Éxito!",
                   description: "Has iniciado sesión correctamente. Redirigiendo...",
                 });
+                // Store token in localStorage
+                if (result.token) {
+                    localStorage.setItem('token', result.token);
+                }
+
                 // Redirect using the URL from the API response
                 if (result.redirectTo) {
                   window.location.href = result.redirectTo;

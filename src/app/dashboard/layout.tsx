@@ -33,11 +33,21 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('[Layout] Auth check failed, no token in localStorage. Redirecting to login.');
+        router.replace('/login');
+        return;
+      }
+      
       try {
-        console.log('[Layout] Verifying auth. Cookies available to JS:', document.cookie);
-        const response = await fetch('/api/check-auth', { credentials: 'include' });
+        console.log('[Layout] Verifying auth with token from localStorage.');
+        const response = await fetch('/api/check-auth', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         
-        // We no longer check response.ok, as it will always be 200
         const data = await response.json();
         console.log('[Layout] Auth check response from API:', data);
 
@@ -47,6 +57,7 @@ export default function DashboardLayout({
         setIsAuthenticating(false);
       } catch (error) {
         console.error('[Layout] Auth check failed, redirecting to login.', error);
+        localStorage.removeItem('token');
         router.replace('/login');
       }
     };
@@ -54,12 +65,8 @@ export default function DashboardLayout({
   }, [router]);
 
   const handleLogout = async () => {
-    const response = await fetch('/api/logout', { method: 'POST' });
-    if (response.ok) {
-      router.replace('/login');
-    } else {
-      console.error('Failed to log out');
-    }
+    localStorage.removeItem('token');
+    router.replace('/login');
   };
 
   if (isAuthenticating) {

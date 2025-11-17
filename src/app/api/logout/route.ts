@@ -1,17 +1,20 @@
 import {NextResponse} from 'next/server';
 
+// This route is no longer strictly necessary with localStorage-based auth,
+// but we'll keep it for completeness in case it's called.
+// The primary logout mechanism is now client-side.
 export async function POST() {
   try {
     const response = NextResponse.json({
       success: true,
-      message: 'Cierre de sesión exitoso.',
+      message: 'Cierre de sesión procesado.',
     });
 
-    // Clear the token cookie
+    // Clear the token cookie if it somehow still exists
     response.cookies.set('token', '', {
       httpOnly: true,
       path: '/',
-      expires: new Date(0), // Set expiry date to the past
+      expires: new Date(0),
     });
 
     return response;

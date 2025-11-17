@@ -54,15 +54,8 @@ export async function POST(request: Request) {
     const response = NextResponse.json({
       success: true,
       message: 'Inicio de sesión exitoso.',
-      redirectTo: '/dashboard', // Tell the client where to go
-    });
-
-    // Set token in a httpOnly cookie
-    response.cookies.set('token', token, {
-      httpOnly: true,
-      path: '/',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 1 day
+      token: token,
+      redirectTo: '/dashboard',
     });
 
     return response;
