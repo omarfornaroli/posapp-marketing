@@ -1,4 +1,6 @@
 'use client';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -15,11 +17,26 @@ import {
   CreditCard,
   User,
   LogOut,
+  Loader2,
 } from 'lucide-react';
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {Button} from '@/components/ui/button';
-import {useRouter} from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
+
+// This function can be moved to a lib file if needed
+async function checkAuthStatus() {
+  try {
+    // We check for a session by looking for the token cookie.
+    // The presence of the cookie is checked on the server-side.
+    const response = await fetch('/api/check-auth'); // This API route needs to exist
+    if (!response.ok) return { isAuthenticated: false };
+    const data = await response.json();
+    return { isAuthenticated: data.isAuthenticated };
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    return { isAuthenticated: false };
+  }
+}
 
 export default function DashboardLayout({
   children,
@@ -27,16 +44,40 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      // A simple check for a token cookie. In a real app, you'd verify it.
+      const hasToken = document.cookie.includes('token=');
+      if (!hasToken) {
+        router.replace('/login');
+      } else {
+        setIsAuthenticating(false);
+      }
+    };
+    verifyAuth();
+  }, [router]);
+
 
   const handleLogout = async () => {
-    const response = await fetch('/api/logout', {method: 'POST'});
+    const response = await fetch('/api/logout', { method: 'POST' });
     if (response.ok) {
-      router.push('/login');
+      // Use replace to prevent going back to the dashboard via browser history
+      router.replace('/login');
     } else {
-      // Handle logout error
       console.error('Failed to log out');
+      // Optionally show a toast notification for the error
     }
   };
+
+  if (isAuthenticating) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
