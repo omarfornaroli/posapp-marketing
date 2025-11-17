@@ -1,3 +1,4 @@
+
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
 import {
@@ -11,27 +12,17 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar-dashboard';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import {
   Home,
   Rocket,
   CreditCard,
   User,
   LogOut,
   Loader2,
-  ChevronDown,
-  CircleDot,
-  RefreshCw,
-  Trash2,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SidebarMenuButton } from '@/components/ui/sidebar-dashboard';
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({
   children,
@@ -124,41 +115,16 @@ export default function DashboardLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
 
-            <Collapsible>
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <button
-                    className={cn(
-                      'flex w-full items-center justify-between gap-3 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2',
-                      isActive('/dashboard/deploy') &&
-                        'bg-sidebar-primary font-medium text-sidebar-primary-foreground'
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Rocket />
-                      <span>Estado del Deploy</span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
-                  </button>
-                </CollapsibleTrigger>
-              </SidebarMenuItem>
-              <CollapsibleContent>
-                <div className="flex flex-col gap-1 py-1 pl-11 pr-2">
-                  <SidebarMenuButton href="/dashboard/deploy" size="sm" variant="ghost">
-                      <CircleDot className="h-3 w-3" />
-                      <span>Ver Estado</span>
-                  </SidebarMenuButton>
-                  <SidebarMenuButton href="#" size="sm" variant="ghost">
-                      <RefreshCw className="h-3 w-3" />
-                      <span>Reiniciar Deploy</span>
-                  </SidebarMenuButton>
-                  <SidebarMenuButton href="#" size="sm" variant="ghost" className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-3 w-3" />
-                      <span>Borrar DB</span>
-                  </SidebarMenuButton>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                href="/dashboard/deploy"
+                isActive={isActive('/dashboard/deploy')}
+                tooltip="Estado del Deploy"
+              >
+                <Rocket />
+                <span>Estado del Deploy</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
 
             <SidebarMenuItem>
               <SidebarMenuButton
