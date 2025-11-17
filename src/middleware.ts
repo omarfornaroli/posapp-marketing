@@ -9,55 +9,53 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = pathname === '/login' || pathname === '/register';
   const isProtectedRoute = pathname.startsWith('/dashboard');
 
-  // This is the secret key used to sign the JWT.
-  // It MUST be loaded from environment variables.
-  const secret = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'your-fallback-secret'
-  );
-
-  // If trying to access a protected route
-  if (isProtectedRoute) {
-    if (!token) {
-      // No token, redirect to login
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/login';
-      return NextResponse.redirect(loginUrl);
+  const secretString = process.env.JWT_SECRET;
+  if (!secretString) {
+    console.error('JWT_SECRET is not defined in environment variables');
+    // In a real scenario, you might want to redirect to an error page or just deny access
+    // For now, we'll redirect to login as if there's no valid session.
+    if (isProtectedRoute) {
+        const loginUrl = request.nextUrl.clone();
+        loginUrl.pathname = '/login';
+        return NextResponse.redirect(loginUrl);
     }
+    return NextResponse.next();
+  }
+  const secret = new TextEncoder().encode(secretString);
 
+  // If there's no token and user tries to access a protected route
+  if (!token && isProtectedRoute) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // If there is a token
+  if (token) {
     try {
       // Verify token
       await jose.jwtVerify(token, secret);
-      // Token is valid, allow access
-      return NextResponse.next();
-    } catch (error) {
-      // Token is invalid, redirect to login and clear the corrupt cookie
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/login';
-      const response = NextResponse.redirect(loginUrl);
-      response.cookies.set('token', '', {path: '/', expires: new Date(0)});
-      return response;
-    }
-  }
 
-  // If trying to access an auth route (login/register)
-  if (isAuthRoute) {
-    if (token) {
-      try {
-        // If there's a valid token, user is already logged in
-        await jose.jwtVerify(token, secret);
-        // Redirect to dashboard
+      // If token is valid and user is on an auth route, redirect to dashboard
+      if (isAuthRoute) {
         const dashboardUrl = request.nextUrl.clone();
         dashboardUrl.pathname = '/dashboard';
         return NextResponse.redirect(dashboardUrl);
-      } catch (error) {
-        // Token is invalid, allow access to auth route but clear cookie
-        const response = NextResponse.next();
+      }
+
+    } catch (error) {
+      // Token is invalid, if on a protected route, redirect to login and clear corrupt cookie
+      if (isProtectedRoute) {
+        const loginUrl = request.nextUrl.clone();
+        loginUrl.pathname = '/login';
+        const response = NextResponse.redirect(loginUrl);
         response.cookies.set('token', '', {path: '/', expires: new Date(0)});
         return response;
       }
     }
   }
 
+  // Allow the request to proceed
   return NextResponse.next();
 }
 
@@ -70,7 +68,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - The root path '/'
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/dashboard/:path*',
+    '/login',
+    '/register',
   ],
 };
