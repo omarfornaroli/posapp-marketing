@@ -558,23 +558,21 @@ const SidebarMenuButton = React.forwardRef<
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : "a"
     const { isMobile, state } = useSidebar()
     const pathname = usePathname();
     const isActive = isActiveProp ?? (href ? pathname === href : false);
 
     const button = (
-      <NextLink href={href || '#'} passHref legacyBehavior>
-        <Comp
-          ref={ref}
-          data-sidebar="menu-button"
-          data-size={size}
-          data-active={isActive}
-          className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-          {...props}
-        >
-          {children}
-        </Comp>
+      <NextLink
+        href={href || '#'}
+        ref={ref as React.Ref<HTMLAnchorElement>}
+        data-sidebar="menu-button"
+        data-size={size}
+        data-active={isActive}
+        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      >
+        {children}
       </NextLink>
     )
 

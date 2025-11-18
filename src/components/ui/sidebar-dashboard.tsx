@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -236,7 +237,7 @@ const Sidebar = React.forwardRef<
             state === 'expanded' &&
               (variant === 'floating' || variant === 'inset'
                 ? 'w-[var(--sidebar-width)]'
-                : 'w-[var(--sidebar-width)]')
+                : 'w-[--sidebar-width)]')
           )}
           {...props}
         >
@@ -497,20 +498,16 @@ const SidebarMenuButton = React.forwardRef<
     const renderButton = () => {
       if (href) {
         return (
-          <NextLink href={href} passHref legacyBehavior>
-            <Comp
-              ref={ref}
-              data-sidebar="menu-button"
-              data-size={size}
-              data-active={isActive}
-              className={cn(
-                sidebarMenuButtonVariants({variant, size}),
-                className
-              )}
-              {...props}
-            >
-              {children}
-            </Comp>
+          <NextLink
+            href={href}
+            ref={ref as React.Ref<HTMLAnchorElement>}
+            data-sidebar="menu-button"
+            data-size={size}
+            data-active={isActive}
+            className={cn(sidebarMenuButtonVariants({variant, size}), className)}
+            {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+          >
+            {children}
           </NextLink>
         );
       }
