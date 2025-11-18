@@ -11,6 +11,7 @@ import {
   SidebarProvider,
   SidebarInset,
   SidebarSeparator,
+  SidebarTrigger,
 } from '@/components/ui/sidebar-dashboard';
 import {
   Home,
@@ -106,7 +107,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex w-full flex-col items-center gap-2">
             {profile ? (
@@ -183,7 +184,12 @@ export default function DashboardLayout({
           </Button>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+            <SidebarTrigger className="md:hidden"/>
+        </header>
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }
