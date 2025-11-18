@@ -12,6 +12,7 @@ import {
   SidebarInset,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarMenuButton,
 } from '@/components/ui/sidebar-dashboard';
 import {
   Home,
@@ -23,7 +24,6 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { SidebarMenuButton } from '@/components/ui/sidebar-dashboard';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -112,16 +112,18 @@ export default function DashboardLayout({
           <div className="flex w-full flex-col items-center gap-2">
             {profile ? (
               <>
-                <Avatar className="w-16 h-16">
+                <Avatar className="w-16 h-16 transition-all duration-300 group-data-[state=collapsed]:w-10 group-data-[state=collapsed]:h-10">
                   <AvatarImage src={profile.avatar} />
                   <AvatarFallback>{profile.businessName?.charAt(0) ?? 'U'}</AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-semibold text-center">{profile.businessName}</span>
+                <span className="text-sm font-semibold text-center transition-opacity duration-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:pointer-events-none">
+                    {profile.businessName}
+                </span>
               </>
             ) : (
                 <div className="flex w-full flex-col items-center gap-2">
-                    <Skeleton className="h-16 w-16 rounded-full" />
-                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-16 w-16 rounded-full transition-all duration-300 group-data-[state=collapsed]:h-10 group-data-[state=collapsed]:w-10" />
+                    <Skeleton className="h-4 w-24 transition-opacity duration-200 group-data-[state=collapsed]:opacity-0" />
                 </div>
             )}
           </div>
@@ -174,14 +176,18 @@ export default function DashboardLayout({
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2"
-            onClick={handleLogout}
-          >
-            <LogOut size={16} />
-            <span>Cerrar Sesión</span>
-          </Button>
+           <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                href="#"
+                onClick={handleLogout}
+                tooltip="Cerrar Sesión"
+              >
+                <LogOut />
+                <span>Cerrar Sesión</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
