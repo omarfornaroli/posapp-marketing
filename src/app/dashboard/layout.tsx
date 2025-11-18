@@ -90,8 +90,14 @@ export default function DashboardLayout({
   }, [router]);
 
   const handleLogout = async () => {
-    localStorage.removeItem('token');
-    router.replace('/login');
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } catch (error) {
+      console.error("Logout API call failed, proceeding with client-side logout.", error);
+    } finally {
+      localStorage.removeItem('token');
+      router.replace('/login');
+    }
   };
 
   if (isAuthenticating) {
