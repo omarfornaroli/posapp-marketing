@@ -193,12 +193,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[var(--sidebar-width)] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
+            className="w-full bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             side={side}
           >
             <div className="sr-only">
@@ -240,7 +235,7 @@ const Sidebar = React.forwardRef<
             state === 'expanded' &&
               (variant === 'floating' || variant === 'inset'
                 ? 'w-[var(--sidebar-width)]'
-                : 'w-[var(--sidebar-width)]')
+                : 'w-[--sidebar-width)]')
           )}
           {...props}
         >
@@ -252,7 +247,7 @@ const Sidebar = React.forwardRef<
               'bg-sidebar',
               variant === 'floating' &&
                 'rounded-lg border border-sidebar-border shadow',
-              state === 'expanded' && 'w-[var(--sidebar-width)]'
+              state === 'expanded' && 'w-full'
             )}
           >
             {children}
@@ -475,29 +470,8 @@ const SidebarMenuButton = React.forwardRef<
     const {state} = useSidebar();
     const pathname = usePathname();
     const isActive = isActiveProp ?? (href ? pathname === href : false);
-
-    const buttonContent = (
-      <>
-        {children}
-        <span
-          className={cn(
-            'truncate transition-all',
-            state === 'collapsed' && 'absolute -z-10 opacity-0'
-          )}
-        >
-          {children &&
-            React.Children.map(children, child => {
-              if (React.isValidElement(child) && 'props' in child) {
-                if (typeof child.props.children === 'string')
-                  return child.props.children;
-              }
-            })}
-        </span>
-      </>
-    );
     
     const Comp = asChild ? Slot : NextLink;
-
 
     const renderButton = () => {
       return (
@@ -619,4 +593,5 @@ export {
   useSidebar,
 };
 
+    
     
