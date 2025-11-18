@@ -9,7 +9,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - APP_TITLE=${APP_TITLE}
       - PORT=3000
       # This is the connection string for the mongo service defined below.
       - MONGODB_URI=mongodb://mongo:27017/posapp-marketing
