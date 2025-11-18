@@ -10,6 +10,7 @@ import {
   SidebarFooter,
   SidebarProvider,
   SidebarInset,
+  SidebarSeparator,
 } from '@/components/ui/sidebar-dashboard';
 import {
   Home,
@@ -124,6 +125,7 @@ export default function DashboardLayout({
             )}
           </div>
         </SidebarHeader>
+        <SidebarSeparator />
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
