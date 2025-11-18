@@ -107,7 +107,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex w-full flex-col items-center gap-2">
             {profile ? (
               <>
                 <Avatar className="w-16 h-16">
@@ -117,7 +117,7 @@ export default function DashboardLayout({
                 <span className="text-sm font-semibold text-center">{profile.businessName}</span>
               </>
             ) : (
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex w-full flex-col items-center gap-2">
                     <Skeleton className="h-16 w-16 rounded-full" />
                     <Skeleton className="h-4 w-24" />
                 </div>
