@@ -235,7 +235,7 @@ const Sidebar = React.forwardRef<
             state === 'expanded' &&
               (variant === 'floating' || variant === 'inset'
                 ? 'w-[var(--sidebar-width)]'
-                : 'w-[--sidebar-width)]')
+                : 'w-[var(--sidebar-width)]')
           )}
           {...props}
         >
@@ -352,7 +352,7 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn('flex flex-col gap-2 p-3 mt-auto', className)}
+      className={cn('flex flex-col gap-2 mt-auto', className)}
       {...props}
     />
   );
