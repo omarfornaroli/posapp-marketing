@@ -21,6 +21,8 @@ import {
   Loader2,
   Link as LinkIcon,
   ExternalLink,
+  Play,
+  PowerOff,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -206,8 +208,12 @@ export default function DeployPage() {
             <CardContent className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4">
                  <Button>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Reiniciar Deploy
+                    <Play className="mr-2 h-4 w-4" />
+                    Iniciar Instancia
+                 </Button>
+                 <Button variant="outline">
+                    <PowerOff className="mr-2 h-4 w-4" />
+                    Parar Instancia
                  </Button>
                  <Button variant="destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
