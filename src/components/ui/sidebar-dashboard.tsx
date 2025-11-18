@@ -13,7 +13,7 @@ import {cn} from '@/lib/utils';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Separator} from '@/components/ui/separator';
-import {Sheet, SheetContent} from '@/components/ui/sheet';
+import {Sheet, SheetContent, SheetTitle} from '@/components/ui/sheet';
 import {Skeleton} from '@/components/ui/skeleton';
 import {
   Tooltip,
@@ -201,6 +201,9 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
+            <div className="sr-only">
+              <SheetTitle>Menú de Navegación</SheetTitle>
+            </div>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
         </Sheet>
@@ -237,7 +240,7 @@ const Sidebar = React.forwardRef<
             state === 'expanded' &&
               (variant === 'floating' || variant === 'inset'
                 ? 'w-[var(--sidebar-width)]'
-                : 'w-[--sidebar-width)]')
+                : 'w-[var(--sidebar-width)]')
           )}
           {...props}
         >
@@ -443,16 +446,16 @@ const sidebarMenuButtonVariants = cva(
 );
 
 interface SidebarMenuButtonProps
-  extends React.ComponentProps<'button'>,
+  extends Omit<React.ComponentProps<typeof NextLink>, 'href'>,
     VariantProps<typeof sidebarMenuButtonVariants> {
   asChild?: boolean;
   isActive?: boolean;
   tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-  href?: string;
+  href: string;
 }
 
 const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement,
+  HTMLAnchorElement,
   SidebarMenuButtonProps
 >(
   (
@@ -492,37 +495,24 @@ const SidebarMenuButton = React.forwardRef<
         </span>
       </>
     );
+    
+    const Comp = asChild ? Slot : NextLink;
 
-    const Comp = asChild ? Slot : 'button';
 
     const renderButton = () => {
-      if (href) {
-        return (
-          <NextLink
+      return (
+          <Comp
             href={href}
-            ref={ref as React.Ref<HTMLAnchorElement>}
+            ref={ref}
             data-sidebar="menu-button"
             data-size={size}
             data-active={isActive}
             className={cn(sidebarMenuButtonVariants({variant, size}), className)}
-            {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+            {...props}
           >
             {children}
-          </NextLink>
+          </Comp>
         );
-      }
-      return (
-        <Comp
-          ref={ref}
-          data-sidebar="menu-button"
-          data-size={size}
-          data-active={isActive}
-          className={cn(sidebarMenuButtonVariants({variant, size}), className)}
-          {...props}
-        >
-          {children}
-        </Comp>
-      );
     };
 
     if (!tooltip) {
@@ -628,3 +618,5 @@ export {
   SidebarTrigger,
   useSidebar,
 };
+
+    
