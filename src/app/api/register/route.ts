@@ -57,8 +57,8 @@ export async function POST(request: Request) {
     await newSubscription.save();
     
     // Get next port numbers
-    const appPort = await getNextSequenceValue('app_port', 9003);
-    const dbPort = await getNextSequenceValue('db_port', 27028);
+    const appPort = await getNextSequenceValue('app_port', 3001);
+    const dbPort = await getNextSequenceValue('db_port', 27018);
 
     const newDeployment = new Deployment({
       app_port: appPort,
