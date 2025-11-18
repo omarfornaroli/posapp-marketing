@@ -3,7 +3,7 @@
 import {NextResponse, type NextRequest} from 'next/server';
 import jwt from 'jsonwebtoken';
 import {connectToDatabase} from '@/lib/mongodb';
-import User from '@/models/user';
+import Enterprise from '@/models/enterprise';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     
     await connectToDatabase();
     
-    const user = await User.findById(decoded.userId).select('-password');
+    const user = await Enterprise.findById(decoded.userId).select('-password');
 
     if (!user) {
       return NextResponse.json(

@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import {z} from 'zod';
 import {connectToDatabase} from '@/lib/mongodb';
-import User from '@/models/user';
+import Enterprise from '@/models/enterprise';
 
 const changePasswordSchema = z.object({
     currentPassword: z.string().min(1, 'La contraseña actual es requerida.'),
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     await connectToDatabase();
     
-    const user = await User.findById(decoded.userId);
+    const user = await Enterprise.findById(decoded.userId);
 
     if (!user) {
       return NextResponse.json({success: false, message: 'Usuario no encontrado.'}, {status: 404});

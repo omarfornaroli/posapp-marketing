@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {z} from 'zod';
 import {connectToDatabase} from '@/lib/mongodb';
-import User from '@/models/user';
+import Enterprise from '@/models/enterprise';
 
 const loginSchema = z.object({
   email: z.string().email('El email no es válido.'),
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const user = await User.findOne({email});
+    const user = await Enterprise.findOne({email});
 
     if (!user) {
       return NextResponse.json(
