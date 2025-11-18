@@ -5,19 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: posify-app
+    container_name: posify-marketing-app
     ports:
-      - "3000:3000"
+      - "9002:3000"
     environment:
-      - PORT=3000
       # This is the connection string for the mongo service defined below.
       - MONGODB_URI=mongodb://mongo:27017/posapp-marketing
       - JWT_SECRET=your-production-jwt-secret
-      # Demo data is disabled for this Docker setup.
-      # Change to 'true' if you want to load demo data on first run.
-      - LOAD_DEMO_DATA=false
-      # Add your Gemini API key here to enable AI features.
-      - GEMINI_API_KEY=
     depends_on:
       - mongo
     networks:
@@ -26,7 +20,7 @@ services:
 
   mongo:
     image: mongo:latest
-    container_name: posify-mongo
+    container_name: posify-marketing-mongo
     ports:
       - "27017:27017"
     volumes:

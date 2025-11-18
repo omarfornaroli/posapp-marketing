@@ -8,9 +8,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Carpeta de build de Next.js (la copiaremos manualmente en el Dockerfile)
-.next
-
 # Variables de entorno locales
 .env
 .env.local

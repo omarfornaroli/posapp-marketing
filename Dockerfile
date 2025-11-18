@@ -4,13 +4,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# Etapa 2: Ejecutar la aplicación compilada
-FROM node:18-alpine AS runner
-WORKDIR /app
-
-# Copia las dependencias de producción de la etapa anterior
-COPY --from=deps /app/node_modules ./node_modules
-
 # REQUISITO: Debes haber ejecutado 'npm run build' en tu máquina local antes de construir esta imagen.
 COPY .next ./.next
 COPY next.config.ts ./
