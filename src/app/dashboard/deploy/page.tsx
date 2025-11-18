@@ -148,34 +148,44 @@ export default function DeployPage() {
                   <div className="flex items-center gap-4"><Skeleton className="h-6 w-6 rounded-full" /><Skeleton className="h-5 w-64" /><Skeleton className="h-8 w-20" /></div>
                 </>
               ) : (
-                <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li className="flex items-center gap-3">
-                        <Server className="h-5 w-5 text-primary"/>
-                        <span className="font-semibold text-foreground">Puerto de la App:</span>
-                        <code className="bg-muted px-2 py-1 rounded-md">{appPort}</code>
+                <ul className="space-y-6 text-sm text-muted-foreground">
+                    <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                        <div className="flex items-center gap-3">
+                            <Server className="h-5 w-5 text-primary shrink-0"/>
+                            <span className="font-semibold text-foreground">Puerto de la App:</span>
+                        </div>
+                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">{appPort}</code>
                     </li>
-                     <li className="flex items-center gap-3">
-                        <Database className="h-5 w-5 text-primary"/>
-                        <span className="font-semibold text-foreground">Puerto de la DB:</span>
-                        <code className="bg-muted px-2 py-1 rounded-md">27028</code>
+                     <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                        <div className="flex items-center gap-3">
+                            <Database className="h-5 w-5 text-primary shrink-0"/>
+                            <span className="font-semibold text-foreground">Puerto de la DB:</span>
+                        </div>
+                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">27028</code>
                     </li>
                     {profile?.businessName && (
                       <>
-                        <li className="flex items-center gap-3">
-                            <Globe className="h-5 w-5 text-primary"/>
-                            <span className="font-semibold text-foreground">URL Base:</span>
-                            <code className="bg-muted px-2 py-1 rounded-md">{generateUrl(profile.businessName)}</code>
+                        <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                           <div className="flex items-center gap-3">
+                                <Globe className="h-5 w-5 text-primary shrink-0"/>
+                                <span className="font-semibold text-foreground">URL Base:</span>
+                            </div>
+                            <code className="bg-muted px-2 py-1 rounded-md break-all">{generateUrl(profile.businessName)}</code>
                         </li>
-                        <li className="flex items-center gap-3">
-                            <LinkIcon className="h-5 w-5 text-primary"/>
-                            <span className="font-semibold text-foreground">URL Completa:</span>
-                            <code className="bg-muted px-2 py-1 rounded-md mr-2">{fullUrl}</code>
-                            <Button asChild variant="outline" size="sm">
-                              <a href={fullUrl} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="mr-2 h-4 w-4" />
-                                Abrir
-                              </a>
-                            </Button>
+                        <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                            <div className="flex items-center gap-3">
+                                <LinkIcon className="h-5 w-5 text-primary shrink-0"/>
+                                <span className="font-semibold text-foreground">URL Completa:</span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <code className="bg-muted px-2 py-1 rounded-md break-all">{fullUrl}</code>
+                                <Button asChild variant="outline" size="sm" className="shrink-0">
+                                  <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+                                    <ExternalLink className="mr-2 h-4 w-4" />
+                                    Abrir
+                                  </a>
+                                </Button>
+                            </div>
                         </li>
                       </>
                     )}
