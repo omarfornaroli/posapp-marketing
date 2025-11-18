@@ -193,7 +193,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-full bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-full bg-sidebar p-0 text-sidebar-foreground"
             side={side}
           >
             <div className="sr-only">
