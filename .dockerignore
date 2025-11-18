@@ -1,0 +1,24 @@
+# Evita que el contexto de build de Docker se llene de archivos innecesarios
+
+# Dependencias locales
+node_modules
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Carpeta de build de Next.js (la copiaremos manualmente en el Dockerfile)
+.next
+
+# Variables de entorno locales
+.env
+.env.local
+
+# Archivos del editor
+.vscode
+.idea
+
+# Otros
+.DS_Store
+README.md
