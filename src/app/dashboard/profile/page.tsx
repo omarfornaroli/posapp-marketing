@@ -249,10 +249,10 @@ export default function ProfilePage() {
                       <Avatar className="w-24 h-24 mx-auto mb-4 border-4 border-primary">
                           <AvatarImage src={profile.avatar} />
                           <AvatarFallback>
-                              {profile.name.charAt(0)}
+                              {profile.businessName.charAt(0)}
                           </AvatarFallback>
                       </Avatar>
-                      <CardTitle className="text-2xl">{profile.name}</CardTitle>
+                      <CardTitle className="text-2xl">{profile.businessName}</CardTitle>
                       <CardDescription>{profile.email}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">

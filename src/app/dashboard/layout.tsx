@@ -29,6 +29,7 @@ interface UserProfile {
   name: string;
   email: string;
   avatar: string;
+  businessName: string;
 }
 
 export default function DashboardLayout({
@@ -111,9 +112,9 @@ export default function DashboardLayout({
               <>
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={profile.avatar} />
-                  <AvatarFallback>{profile.name?.charAt(0) ?? 'U'}</AvatarFallback>
+                  <AvatarFallback>{profile.businessName?.charAt(0) ?? 'U'}</AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-semibold text-center">{profile.name}</span>
+                <span className="text-sm font-semibold text-center">{profile.businessName}</span>
               </>
             ) : (
                 <div className="flex flex-col items-center gap-2">
