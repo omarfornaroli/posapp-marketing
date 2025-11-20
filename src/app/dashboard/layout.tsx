@@ -21,6 +21,7 @@ import {
   User,
   LogOut,
   Loader2,
+  Server,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
@@ -156,10 +157,10 @@ export default function DashboardLayout({
               <SidebarMenuButton
                 href="/dashboard/deploy"
                 isActive={isActive('/dashboard/deploy')}
-                tooltip="Estado del Deploy"
+                tooltip="Estado de la app"
               >
-                <Rocket />
-                <span>Estado del Deploy</span>
+                <Server />
+                <span>Estado de la app</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 

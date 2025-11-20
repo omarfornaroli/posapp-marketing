@@ -122,7 +122,7 @@ export default function DeployPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-grow p-4 md:p-8">
         <h1 className="text-3xl font-bold text-primary mb-6">
-          Estado del Deploy
+          Estado de la App
         </h1>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card>
