@@ -57,16 +57,21 @@ const statusConfig: Record<
   },
 };
 
+interface Deployment {
+    app_port: number;
+    db_port: number;
+    status: DeployStatus;
+}
+
 interface Profile {
     businessName: string;
+    deployment: Deployment;
 }
 
 export default function DeployPage() {
-  const currentStatus: DeployStatus = 'funcionando';
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const appPort = 9003;
-
+  
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
@@ -94,6 +99,8 @@ export default function DeployPage() {
     fetchProfile();
   }, []);
 
+  const currentStatus: DeployStatus = profile?.deployment?.status ?? 'parado';
+
   const {
     text: statusText,
     icon: StatusIcon,
@@ -106,7 +113,10 @@ export default function DeployPage() {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
   }
 
-  const fullUrl = profile ? `http://168.181.187.83:${appPort}/${generateUrl(profile.businessName)}` : '';
+  const appPort = profile?.deployment?.app_port;
+  const dbPort = profile?.deployment?.db_port;
+  const basePath = profile ? generateUrl(profile.businessName) : '';
+  const fullUrl = appPort ? `http://168.181.187.83:${appPort}/${basePath}` : '';
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -156,23 +166,23 @@ export default function DeployPage() {
                             <Server className="h-5 w-5 text-primary shrink-0"/>
                             <span className="font-semibold text-foreground">Puerto de la App:</span>
                         </div>
-                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">{appPort}</code>
+                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">{appPort ?? 'N/A'}</code>
                     </li>
                      <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-3">
                             <Database className="h-5 w-5 text-primary shrink-0"/>
                             <span className="font-semibold text-foreground">Puerto de la DB:</span>
                         </div>
-                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">27028</code>
+                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">{dbPort ?? 'N/A'}</code>
                     </li>
-                    {profile?.businessName && (
+                    {basePath && (
                       <>
                         <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                            <div className="flex items-center gap-3">
                                 <Globe className="h-5 w-5 text-primary shrink-0"/>
                                 <span className="font-semibold text-foreground">URL Base:</span>
                             </div>
-                            <code className="bg-muted px-2 py-1 rounded-md break-all">{generateUrl(profile.businessName)}</code>
+                            <code className="bg-muted px-2 py-1 rounded-md break-all">{basePath}</code>
                         </li>
                         <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                             <div className="flex items-center gap-3">
@@ -181,12 +191,14 @@ export default function DeployPage() {
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <code className="bg-muted px-2 py-1 rounded-md break-all">{fullUrl}</code>
-                                <Button asChild variant="outline" size="sm" className="shrink-0">
-                                  <a href={fullUrl} target="_blank" rel="noopener noreferrer">
-                                    <ExternalLink className="mr-2 h-4 w-4" />
-                                    Abrir
-                                  </a>
-                                </Button>
+                                {fullUrl && (
+                                  <Button asChild variant="outline" size="sm" className="shrink-0">
+                                    <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+                                      <ExternalLink className="mr-2 h-4 w-4" />
+                                      Abrir
+                                    </a>
+                                  </Button>
+                                )}
                             </div>
                         </li>
                       </>

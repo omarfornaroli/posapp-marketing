@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     
     await connectToDatabase();
     
-    const user = await Enterprise.findById(decoded.userId).select('-password');
+    const user = await Enterprise.findById(decoded.userId).select('-password').populate('deployment');
 
     if (!user) {
       return NextResponse.json(
@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
             businessIndustry: user.businessIndustry,
             businessAddress: user.businessAddress,
             avatar: `https://picsum.photos/seed/${decoded.userId}/100/100`,
+            deployment: user.deployment
         }
     });
 
