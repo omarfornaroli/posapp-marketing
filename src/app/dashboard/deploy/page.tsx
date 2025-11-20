@@ -83,6 +83,13 @@ interface Profile {
     deployment: Deployment;
 }
 
+interface ContainerStatus {
+    id: string;
+    name: string;
+    rawStatus: string;
+    status: string; // "up" or "down"
+}
+
 export default function DeployPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -130,19 +137,19 @@ export default function DeployPage() {
         },
       });
 
-      const responseText = await response.text();
-      // Try to parse as JSON, but don't fail if it's just text
-      try {
-        const data = JSON.parse(responseText);
-        if (data.success && data.status) {
-            setCurrentStatus(data.status);
-        }
-      } catch (e) {
-        // It's probably just a text response, which is fine for some status checks
+      // Status response is an array of containers
+      const data: ContainerStatus[] = await response.json();
+      
+      // Determine the overall status
+      if (Array.isArray(data) && data.length > 0 && data.every(c => c.status === 'up')) {
+          setCurrentStatus('funcionando');
+      } else {
+          setCurrentStatus('parado');
       }
 
     } catch (e) {
       console.error("Failed to fetch status", e);
+      setCurrentStatus('parado'); // Default to 'parado' on any error
     }
   };
 

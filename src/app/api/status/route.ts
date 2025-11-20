@@ -40,22 +40,23 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ enterpriseId }),
     });
 
-    // 3. Forward the response from the management API, handling both JSON and text
-    const responseText = await managementResponse.text();
-    try {
-        const responseData = JSON.parse(responseText);
-        return NextResponse.json(responseData, {status: managementResponse.status});
-    } catch (e) {
-        return new NextResponse(responseText, {status: managementResponse.status});
-    }
+    // 3. Forward the response from the management API, which should be JSON
+    const responseData = await managementResponse.json();
+    return NextResponse.json(responseData, {status: managementResponse.status});
+
 
   } catch (error: any) {
     console.error('[API Status] Error:', error.message);
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return NextResponse.json({success: false, message: 'Token inválido o expirado.'}, {status: 401});
     }
+    // Handle cases where JSON parsing might fail or network errors
+    if (error instanceof SyntaxError) {
+        return NextResponse.json({ success: false, message: 'La respuesta del servidor de estado no es un JSON válido.'}, {status: 502 });
+    }
+    
     return NextResponse.json(
-      {success: false, message: 'Ocurrió un error en el servidor proxy.'},
+      {success: false, message: 'Ocurrió un error en el servidor proxy de estado.'},
       {status: 500}
     );
   }
