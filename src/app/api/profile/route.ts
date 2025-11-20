@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
             businessIndustry: user.businessIndustry,
             businessAddress: user.businessAddress,
             avatar: `https://picsum.photos/seed/${decoded.userId}/100/100`,
-            deployment: user.deployment
+            deployment: user.deployment || null
         }
     });
 

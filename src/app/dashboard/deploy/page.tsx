@@ -87,7 +87,7 @@ export default function DeployPage() {
           }
         });
         const data = await response.json();
-        if (data.success) {
+        if (data.success && data.profile) {
           setProfile(data.profile);
         }
       } catch (e) {

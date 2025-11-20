@@ -74,7 +74,7 @@ export default function DashboardLayout({
           }
         });
         const profileData = await profileResponse.json();
-        if(!profileData.success) {
+        if(!profileData.success || !profileData.profile) {
             throw new Error(profileData.message || 'Could not fetch profile');
         }
         setProfile(profileData.profile);
