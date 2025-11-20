@@ -307,7 +307,7 @@ export default function DeployPage() {
                     Inicia o detén tu aplicación.
                 </CardDescription>
                 </CardHeader>
-                <CardContent className="space-x-4">
+                <CardContent className="flex flex-wrap gap-4">
                     <Button onClick={() => handleAction('/api/deploy', 'deploy', 'La instancia se está iniciando.')} disabled={!!actionLoading}>
                         {actionLoading === 'deploy' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
                         Iniciar Instancia
