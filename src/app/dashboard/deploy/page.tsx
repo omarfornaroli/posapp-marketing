@@ -41,7 +41,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
-type DeployStatus = 'funcionando' | 'parado' | 'reiniciando';
+type DeployStatus = 'funcionando' | 'parado' | 'reiniciando' | 'Funciona con errores';
 
 const statusConfig: Record<
   DeployStatus,
@@ -57,6 +57,12 @@ const statusConfig: Record<
     icon: CheckCircle,
     color: 'text-green-500',
     description: 'La aplicación está online y operativa.',
+  },
+  'Funciona con errores': {
+    text: 'Funciona con errores',
+    icon: AlertTriangle,
+    color: 'text-yellow-500',
+    description: 'Algunos servicios pueden no estar funcionando correctamente.',
   },
   parado: {
     text: 'Parado',
@@ -87,7 +93,12 @@ interface ContainerStatus {
     id: string;
     name: string;
     rawStatus: string;
-    status: string; // "up" or "down"
+    status: string; // "up" or "down" etc.
+}
+
+interface StatusResponse {
+    ok: boolean;
+    statuses: ContainerStatus[];
 }
 
 export default function DeployPage() {
@@ -137,12 +148,17 @@ export default function DeployPage() {
         },
       });
 
-      // Status response is an array of containers
-      const data: ContainerStatus[] = await response.json();
+      const data: StatusResponse = await response.json();
       
-      // Determine the overall status
-      if (Array.isArray(data) && data.length > 0 && data.every(c => c.status === 'up')) {
-          setCurrentStatus('funcionando');
+      if (data && Array.isArray(data.statuses) && data.statuses.length > 0) {
+        const upCount = data.statuses.filter(s => s.status === 'up').length;
+        if (upCount === data.statuses.length) {
+            setCurrentStatus('funcionando');
+        } else if (upCount > 0) {
+            setCurrentStatus('Funciona con errores');
+        } else {
+            setCurrentStatus('parado');
+        }
       } else {
           setCurrentStatus('parado');
       }
@@ -433,7 +449,5 @@ export default function DeployPage() {
     </div>
   );
 }
-
-    
 
     
