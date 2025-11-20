@@ -40,9 +40,14 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ enterpriseId }),
     });
 
-    // 3. Forward the response from the management API
-    const responseData = await managementResponse.json();
-    return NextResponse.json(responseData, {status: managementResponse.status});
+    // 3. Forward the response from the management API, handling both JSON and text
+    const responseText = await managementResponse.text();
+    try {
+        const responseData = JSON.parse(responseText);
+        return NextResponse.json(responseData, {status: managementResponse.status});
+    } catch (e) {
+        return new NextResponse(responseText, {status: managementResponse.status});
+    }
 
   } catch (error: any) {
     console.error('[API RestoreDB] Error:', error.message);
