@@ -3,7 +3,7 @@
 import {NextResponse, type NextRequest} from 'next/server';
 import jwt from 'jsonwebtoken';
 
-const MANAGEMENT_API_URL = 'http://168.181.187.83:9000/api/backup_db';
+const MANAGEMENT_API_URL = 'http://168.181.187.83:3000/api/backup_db';
 
 export async function POST(request: NextRequest) {
   try {
