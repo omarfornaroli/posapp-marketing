@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 type DeployStatus = 'funcionando' | 'parado' | 'reiniciando' | 'Funciona con errores';
 type WebsiteStatus = 'online' | 'offline' | 'checking';
@@ -104,7 +105,7 @@ const websiteStatusConfig: Record<
     checking: {
         text: 'Verificando...',
         icon: Loader2,
-        color: 'text-blue-500 animate-spin',
+        color: 'text-blue-500',
         description: 'Se está comprobando el estado del sitio web.',
     }
 };
@@ -356,7 +357,7 @@ export default function DeployPage() {
               <CardTitle className="text-sm font-medium">
                 Estado del Sitio Web
               </CardTitle>
-              <SiteStatusIcon className={`h-4 w-4 ${siteStatusColor}`} />
+              <SiteStatusIcon className={cn('h-4 w-4', siteStatusColor, websiteStatus === 'checking' && 'animate-spin')} />
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${siteStatusColor}`}>
@@ -531,7 +532,5 @@ export default function DeployPage() {
     </div>
   );
 }
-
-    
 
     
