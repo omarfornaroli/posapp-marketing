@@ -150,7 +150,7 @@ export default function DeployPage() {
   const appPort = profile?.deployment?.app_port;
   const dbPort = profile?.deployment?.db_port;
   const basePath = profile ? generateUrl(profile.businessName) : '';
-  const fullUrl = appPort ? `http://168.181.187.83:${appPort}` : '';
+  const fullUrl = appPort && basePath ? `http://168.181.187.83:${appPort}/${basePath}` : (appPort ? `http://168.181.187.83:${appPort}`: '');
 
   const checkWebsiteStatus = async () => {
     if (!fullUrl) {
@@ -532,5 +532,3 @@ export default function DeployPage() {
     </div>
   );
 }
-
-    
