@@ -129,10 +129,18 @@ export default function DeployPage() {
           'Content-Type': 'application/json'
         },
       });
-      const data = await response.json();
-      if (data.success && data.status) {
-         setCurrentStatus(data.status);
+
+      const responseText = await response.text();
+      // Try to parse as JSON, but don't fail if it's just text
+      try {
+        const data = JSON.parse(responseText);
+        if (data.success && data.status) {
+            setCurrentStatus(data.status);
+        }
+      } catch (e) {
+        // It's probably just a text response, which is fine for some status checks
       }
+
     } catch (e) {
       console.error("Failed to fetch status", e);
     }
@@ -160,10 +168,33 @@ export default function DeployPage() {
             },
         });
 
-        const result = await response.json();
+        // First, check if the response was successful at a network level
+        if (!response.ok) {
+           // Try to get a message from the body, then fall back to status text
+            let errorMessage = `Error al ejecutar la acción: ${actionName}`;
+            try {
+                const errorResult = await response.json();
+                errorMessage = errorResult.message || errorMessage;
+            } catch (e) {
+                errorMessage = response.statusText;
+            }
+            throw new Error(errorMessage);
+        }
+        
+        // Try to parse JSON, but don't fail if it's not JSON
+        let result: { success?: boolean; message?: string } = {};
+        const responseText = await response.text();
+        if (responseText) {
+          try {
+            result = JSON.parse(responseText);
+          } catch (e) {
+            // Not a JSON response, that's okay. The success is implied by the 2xx status.
+          }
+        }
 
-        if (!response.ok || !result.success) {
-            throw new Error(result.message || `Error al ejecutar la acción: ${actionName}`);
+        // If the result has a `success: false`, treat it as an error
+        if (result.success === false) {
+             throw new Error(result.message || `Error al ejecutar la acción: ${actionName}`);
         }
 
         toast({
@@ -193,7 +224,7 @@ export default function DeployPage() {
     icon: StatusIcon,
     color: statusColor,
     description: statusDescription,
-  } = statusConfig[currentStatus];
+  } = statusConfig[currentStatus] || statusConfig.parado;
 
   const generateUrl = (name: string) => {
     if (!name) return '';
@@ -395,5 +426,7 @@ export default function DeployPage() {
     </div>
   );
 }
+
+    
 
     
