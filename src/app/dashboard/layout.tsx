@@ -74,17 +74,22 @@ export default function DashboardLayout({
           }
         });
         const profileData = await profileResponse.json();
-        if(!profileData.success || !profileData.profile) {
-            throw new Error(profileData.message || 'Could not fetch profile');
+        
+        if (profileData.success && profileData.profile) {
+            setProfile(profileData.profile);
+        } else {
+            console.error('[Layout] Could not fetch profile:', profileData.message || 'Profile data is missing.');
+            // Don't throw, just leave profile as null
         }
-        setProfile(profileData.profile);
-        setIsAuthenticating(false);
 
       } catch (error: any) {
         console.error('[Layout] Auth or profile fetch failed, redirecting to login.', error);
         localStorage.removeItem('token');
         router.replace('/login');
+        return; // Stop execution if auth fails
       }
+      
+      setIsAuthenticating(false);
     };
     checkAuthAndFetchProfile();
   }, [router]);
