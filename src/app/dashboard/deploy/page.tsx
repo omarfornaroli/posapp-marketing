@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,8 +24,22 @@ import {
   ExternalLink,
   Play,
   PowerOff,
+  Save,
+  Download,
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 type DeployStatus = 'funcionando' | 'parado' | 'reiniciando';
 
@@ -71,35 +86,107 @@ interface Profile {
 export default function DeployPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setIsLoading(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const response = await fetch('/api/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const data = await response.json();
-        if (data.success && data.profile) {
-          setProfile(data.profile);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [currentStatus, setCurrentStatus] = useState<DeployStatus>('parado');
+
+  const { toast } = useToast();
+
+  const fetchProfile = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const response = await fetch('/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      } catch (e) {
-        console.error("Failed to fetch profile", e);
-      } finally {
-        setIsLoading(false);
+      });
+      const data = await response.json();
+      if (data.success && data.profile) {
+        setProfile(data.profile);
+        if (data.profile.deployment) {
+            setCurrentStatus(data.profile.deployment.status);
+        }
       }
-    };
+    } catch (e) {
+      console.error("Failed to fetch profile", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const fetchStatus = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const response = await fetch('/api/status', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await response.json();
+      if (data.success && data.status) {
+         setCurrentStatus(data.status);
+      }
+    } catch (e) {
+      console.error("Failed to fetch status", e);
+    }
+  };
+
+  useEffect(() => {
     fetchProfile();
+    const statusInterval = setInterval(() => {
+        fetchStatus();
+    }, 5000); // Check status every 5 seconds
+
+    return () => clearInterval(statusInterval);
   }, []);
 
-  const currentStatus: DeployStatus = profile?.deployment?.status ?? 'parado';
+  const handleAction = async (apiPath: string, actionName: string, successMessage: string) => {
+    setActionLoading(actionName);
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await fetch(apiPath, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || `Error al ejecutar la acción: ${actionName}`);
+        }
+
+        toast({
+            title: '¡Éxito!',
+            description: successMessage,
+        });
+
+        // If status changes, update immediately
+        if(actionName === 'deploy' || actionName === 'stop') {
+            await fetchStatus();
+        }
+
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: `Error en ${actionName}`,
+            description: error.message,
+        });
+    } finally {
+        setActionLoading(null);
+    }
+  };
+
 
   const {
     text: statusText,
@@ -130,7 +217,10 @@ export default function DeployPage() {
               <CardTitle className="text-sm font-medium">
                 Estado Actual
               </CardTitle>
-              <StatusIcon className={`h-4 w-4 ${statusColor}`} />
+               <div className="flex items-center gap-2">
+                {currentStatus === 'reiniciando' && <Loader2 className={`h-4 w-4 ${statusColor}`} />}
+                <StatusIcon className={`h-4 w-4 ${statusColor}`} />
+               </div>
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${statusColor}`}>
@@ -209,42 +299,101 @@ export default function DeployPage() {
           </Card>
         </div>
 
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Acciones</CardTitle>
-              <CardDescription>
-                Gestiona el ciclo de vida de tu aplicación.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                 <Button>
-                    <Play className="mr-2 h-4 w-4" />
-                    Iniciar Instancia
-                 </Button>
-                 <Button variant="outline">
-                    <PowerOff className="mr-2 h-4 w-4" />
-                    Parar Instancia
-                 </Button>
-                 <Button variant="destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Borrar Base de Datos
-                 </Button>
-              </div>
-               <div className="border-l-4 border-yellow-500 bg-yellow-500/10 p-4 rounded-md">
-                    <div className="flex items-center gap-2">
-                         <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                         <h4 className="font-semibold text-yellow-800">Atención</h4>
-                    </div>
-                    <p className="text-sm text-yellow-700 mt-1">
-                        La eliminación de la base de datos es una acción irreversible y borrará todos los datos de los usuarios y del negocio.
-                    </p>
-               </div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-8 md:grid-cols-2 mt-8">
+            <Card>
+                <CardHeader>
+                <CardTitle>Gestión de la Instancia</CardTitle>
+                <CardDescription>
+                    Inicia o detén tu aplicación.
+                </CardDescription>
+                </CardHeader>
+                <CardContent className="space-x-4">
+                    <Button onClick={() => handleAction('/api/deploy', 'deploy', 'La instancia se está iniciando.')} disabled={!!actionLoading}>
+                        {actionLoading === 'deploy' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                        Iniciar Instancia
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" disabled={!!actionLoading}>
+                            {actionLoading === 'stop' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PowerOff className="mr-2 h-4 w-4" />}
+                            Parar Instancia
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción detendrá tu aplicación y no será accesible para los usuarios. Puedes volver a iniciarla en cualquier momento.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleAction('/api/stop', 'stop', 'La instancia se está deteniendo.')}>Continuar</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                </CardContent>
+            </Card>
+             <Card className="border-destructive">
+                <CardHeader>
+                <CardTitle>Gestión de la Base de Datos</CardTitle>
+                <CardDescription>
+                    Realiza copias de seguridad, restaura o elimina tus datos. ¡Usa estas acciones con cuidado!
+                </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-4">
+                     <Button variant="outline" onClick={() => handleAction('/api/backup_db', 'backup', 'Copia de seguridad iniciada.')} disabled={!!actionLoading}>
+                        {actionLoading === 'backup' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Hacer Backup
+                    </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                         <Button variant="outline" disabled={!!actionLoading}>
+                            {actionLoading === 'restore' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                            Restaurar Backup
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¡Atención!</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción sobrescribirá todos los datos actuales con la última copia de seguridad. Esta operación no se puede deshacer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleAction('/api/restore_db', 'restore', 'La restauración de la base de datos ha comenzado.')}>Restaurar Ahora</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                   
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                         <Button variant="destructive" disabled={!!actionLoading}>
+                            {actionLoading === 'delete_db' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                            Borrar Base de Datos
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¡Acción Irreversible!</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Estás a punto de borrar permanentemente toda la base de datos de tu negocio, incluyendo usuarios y ventas. ¿Estás absolutamente seguro?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => handleAction('/api/delete_db', 'delete_db', 'La base de datos se está eliminando.')}>Sí, borrar todo</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                </CardContent>
+            </Card>
         </div>
       </main>
     </div>
   );
 }
+
+    
