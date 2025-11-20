@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Forward the response from the management API, which should be JSON
     const responseData = await managementResponse.json();
+    console.log(`[API Status] Response from management API:`, responseData);
     return NextResponse.json(responseData, {status: managementResponse.status});
 
 

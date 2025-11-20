@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Forward the response from the management API, handling both JSON and text
     const responseText = await managementResponse.text();
+    console.log(`[API DeleteDB] Response from management API:`, responseText);
     try {
         const responseData = JSON.parse(responseText);
         return NextResponse.json(responseData, {status: managementResponse.status});
