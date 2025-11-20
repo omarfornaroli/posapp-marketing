@@ -26,6 +26,7 @@ import {
   PowerOff,
   Save,
   Download,
+  XCircle,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -42,6 +43,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
 type DeployStatus = 'funcionando' | 'parado' | 'reiniciando' | 'Funciona con errores';
+type WebsiteStatus = 'online' | 'offline' | 'checking';
 
 const statusConfig: Record<
   DeployStatus,
@@ -78,6 +80,35 @@ const statusConfig: Record<
   },
 };
 
+const websiteStatusConfig: Record<
+  WebsiteStatus,
+  {
+    text: string;
+    icon: React.ElementType;
+    color: string;
+    description: string;
+  }
+> = {
+    online: {
+        text: 'Sitio Online',
+        icon: CheckCircle,
+        color: 'text-green-500',
+        description: 'La URL de la aplicación está respondiendo correctamente.',
+    },
+    offline: {
+        text: 'Sitio Offline',
+        icon: XCircle,
+        color: 'text-red-500',
+        description: 'No se pudo acceder a la URL de la aplicación.',
+    },
+    checking: {
+        text: 'Verificando...',
+        icon: Loader2,
+        color: 'text-blue-500 animate-spin',
+        description: 'Se está comprobando el estado del sitio web.',
+    }
+};
+
 interface Deployment {
     app_port: number;
     db_port: number;
@@ -106,8 +137,42 @@ export default function DeployPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [currentStatus, setCurrentStatus] = useState<DeployStatus>('parado');
+  const [websiteStatus, setWebsiteStatus] = useState<WebsiteStatus>('checking');
 
   const { toast } = useToast();
+  
+  const generateUrl = (name: string) => {
+    if (!name) return '';
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  }
+
+  const appPort = profile?.deployment?.app_port;
+  const dbPort = profile?.deployment?.db_port;
+  const basePath = profile ? generateUrl(profile.businessName) : '';
+  const fullUrl = appPort ? `http://168.181.187.83:${appPort}` : '';
+
+  const checkWebsiteStatus = async () => {
+    if (!fullUrl) {
+      setWebsiteStatus('offline');
+      return;
+    }
+    setWebsiteStatus('checking');
+    try {
+      // We use 'no-cors' mode because we only care about getting a response, not reading its content.
+      // This prevents CORS errors from browsers.
+      const response = await fetch(fullUrl, { mode: 'no-cors' });
+      // A response of type 'opaque' indicates a successful cross-origin request.
+      if(response.type === 'opaque' || response.ok) {
+        setWebsiteStatus('online');
+      } else {
+        setWebsiteStatus('offline');
+      }
+    } catch (e) {
+      console.error("Failed to ping website", e);
+      setWebsiteStatus('offline');
+    }
+  };
+
 
   const fetchProfile = async () => {
     setIsLoading(true);
@@ -150,7 +215,7 @@ export default function DeployPage() {
 
       const data: StatusResponse = await response.json();
       
-      if (data && Array.isArray(data.statuses) && data.statuses.length > 0) {
+       if (data && Array.isArray(data.statuses) && data.statuses.length > 0) {
         const upCount = data.statuses.filter(s => s.status === 'up').length;
         if (upCount === data.statuses.length) {
             setCurrentStatus('funcionando');
@@ -173,10 +238,11 @@ export default function DeployPage() {
     fetchProfile();
     const statusInterval = setInterval(() => {
         fetchStatus();
+        checkWebsiteStatus();
     }, 5000); // Check status every 5 seconds
 
     return () => clearInterval(statusInterval);
-  }, []);
+  }, [fullUrl]);
 
   const handleAction = async (apiPath: string, actionName: string, successMessage: string) => {
     setActionLoading(actionName);
@@ -228,6 +294,7 @@ export default function DeployPage() {
         // If status changes, update immediately
         if(actionName === 'deploy' || actionName === 'stop') {
             await fetchStatus();
+            await checkWebsiteStatus();
         }
 
     } catch (error: any) {
@@ -248,16 +315,13 @@ export default function DeployPage() {
     color: statusColor,
     description: statusDescription,
   } = statusConfig[currentStatus] || statusConfig.parado;
-
-  const generateUrl = (name: string) => {
-    if (!name) return '';
-    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-  }
-
-  const appPort = profile?.deployment?.app_port;
-  const dbPort = profile?.deployment?.db_port;
-  const basePath = profile ? generateUrl(profile.businessName) : '';
-  const fullUrl = appPort ? `http://168.181.187.83:${appPort}/${basePath}` : '';
+  
+  const {
+      text: siteStatusText,
+      icon: SiteStatusIcon,
+      color: siteStatusColor,
+      description: siteStatusDescription,
+  } = websiteStatusConfig[websiteStatus];
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -269,7 +333,7 @@ export default function DeployPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Estado Actual
+                Estado de Contenedores
               </CardTitle>
                <div className="flex items-center gap-2">
                 {currentStatus === 'reiniciando' && <Loader2 className={`h-4 w-4 ${statusColor}`} />}
@@ -282,6 +346,22 @@ export default function DeployPage() {
               </div>
               <p className="text-xs text-muted-foreground pt-2">
                 {statusDescription}
+              </p>
+            </CardContent>
+          </Card>
+           <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Estado del Sitio Web
+              </CardTitle>
+              <SiteStatusIcon className={`h-4 w-4 ${siteStatusColor}`} />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${siteStatusColor}`}>
+                {siteStatusText}
+              </div>
+              <p className="text-xs text-muted-foreground pt-2">
+                {siteStatusDescription}
               </p>
             </CardContent>
           </Card>
@@ -306,31 +386,31 @@ export default function DeployPage() {
               ) : (
                 <ul className="space-y-6 text-sm text-muted-foreground">
                     <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                        <div className="flex items-center gap-3">
-                            <Server className="h-5 w-5 text-primary shrink-0"/>
+                        <div className="flex items-center gap-3 shrink-0">
+                            <Server className="h-5 w-5 text-primary"/>
                             <span className="font-semibold text-foreground">Puerto de la App:</span>
                         </div>
-                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">{appPort ?? 'N/A'}</code>
+                        <code className="bg-muted px-2 py-1 rounded-md">{appPort ?? 'N/A'}</code>
                     </li>
                      <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                        <div className="flex items-center gap-3">
-                            <Database className="h-5 w-5 text-primary shrink-0"/>
+                        <div className="flex items-center gap-3 shrink-0">
+                            <Database className="h-5 w-5 text-primary"/>
                             <span className="font-semibold text-foreground">Puerto de la DB:</span>
                         </div>
-                        <code className="bg-muted px-2 py-1 rounded-md sm:ml-auto">{dbPort ?? 'N/A'}</code>
+                        <code className="bg-muted px-2 py-1 rounded-md">{dbPort ?? 'N/A'}</code>
                     </li>
                     {basePath && (
                       <>
                         <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                           <div className="flex items-center gap-3">
-                                <Globe className="h-5 w-5 text-primary shrink-0"/>
-                                <span className="font-semibold text-foreground">URL Base:</span>
+                           <div className="flex items-center gap-3 shrink-0">
+                                <Globe className="h-5 w-5 text-primary"/>
+                                <span className="font-semibold text-foreground">Ruta Base:</span>
                             </div>
-                            <code className="bg-muted px-2 py-1 rounded-md break-all">{basePath}</code>
+                            <code className="bg-muted px-2 py-1 rounded-md break-all">{`/${basePath}`}</code>
                         </li>
                         <li className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                            <div className="flex items-center gap-3">
-                                <LinkIcon className="h-5 w-5 text-primary shrink-0"/>
+                            <div className="flex items-center gap-3 shrink-0">
+                                <LinkIcon className="h-5 w-5 text-primary"/>
                                 <span className="font-semibold text-foreground">URL Completa:</span>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
@@ -388,7 +468,7 @@ export default function DeployPage() {
                     </AlertDialog>
                 </CardContent>
             </Card>
-             <Card className="border-destructive">
+             <Card>
                 <CardHeader>
                 <CardTitle>Gestión de la Base de Datos</CardTitle>
                 <CardDescription>
