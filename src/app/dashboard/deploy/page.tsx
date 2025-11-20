@@ -159,14 +159,19 @@ export default function DeployPage() {
     }
     setWebsiteStatus('checking');
     try {
-      const response = await fetch(fullUrl);
-      if (response.ok) {
+      const response = await fetch('/api/ping-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fullUrl }),
+      });
+      const data = await response.json();
+      if (data.online) {
         setWebsiteStatus('online');
       } else {
         setWebsiteStatus('offline');
       }
     } catch (e) {
-      console.error("Failed to ping website", e);
+      console.error("Failed to ping website via proxy", e);
       setWebsiteStatus('offline');
     }
   };
@@ -238,6 +243,10 @@ export default function DeployPage() {
 
   useEffect(() => {
     if (fullUrl) {
+      // Initial check
+      fetchStatus();
+      checkWebsiteStatus();
+
       const statusInterval = setInterval(() => {
           fetchStatus();
           checkWebsiteStatus();
