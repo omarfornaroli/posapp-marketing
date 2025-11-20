@@ -158,11 +158,8 @@ export default function DeployPage() {
     }
     setWebsiteStatus('checking');
     try {
-      // We use 'no-cors' mode because we only care about getting a response, not reading its content.
-      // This prevents CORS errors from browsers.
-      const response = await fetch(fullUrl, { mode: 'no-cors' });
-      // A response of type 'opaque' indicates a successful cross-origin request.
-      if(response.type === 'opaque' || response.ok) {
+      const response = await fetch(fullUrl);
+      if (response.ok) {
         setWebsiteStatus('online');
       } else {
         setWebsiteStatus('offline');
@@ -236,12 +233,17 @@ export default function DeployPage() {
 
   useEffect(() => {
     fetchProfile();
-    const statusInterval = setInterval(() => {
-        fetchStatus();
-        checkWebsiteStatus();
-    }, 5000); // Check status every 5 seconds
+  }, []);
 
-    return () => clearInterval(statusInterval);
+  useEffect(() => {
+    if (fullUrl) {
+      const statusInterval = setInterval(() => {
+          fetchStatus();
+          checkWebsiteStatus();
+      }, 5000); // Check status every 5 seconds
+
+      return () => clearInterval(statusInterval);
+    }
   }, [fullUrl]);
 
   const handleAction = async (apiPath: string, actionName: string, successMessage: string) => {
@@ -529,5 +531,7 @@ export default function DeployPage() {
     </div>
   );
 }
+
+    
 
     
