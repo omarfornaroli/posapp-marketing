@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import {z} from 'zod';
 import {connectToDatabase} from '@/lib/mongodb';
 import Enterprise from '@/models/enterprise';
+import '@/models/deployment'; // Ensure Deployment model is registered
 
 const profileUpdateSchema = z.object({
   businessName: z.string().min(2, "El nombre del negocio debe tener al menos 2 caracteres."),
