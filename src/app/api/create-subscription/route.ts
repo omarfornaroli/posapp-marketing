@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const decoded = jwt.verify(token, secret) as {userId: string; email: string};
-    const userEmail = decoded.email;
+    const decoded = jwt.verify(token, secret) as {userId: string; email?: string};
+    let userEmail = decoded.email;
 
     if (!userEmail) {
         await connectToDatabase();
@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
         if (!user) {
              return NextResponse.json({success: false, message: 'Usuario no encontrado.'}, {status: 404});
         }
+        userEmail = user.email;
     }
 
     const preApproval = new PreApproval(mpClient);
@@ -74,7 +75,8 @@ export async function POST(request: NextRequest) {
         errorMessage = 'Token inválido o expirado.';
     } else if (error.cause) {
         // MercadoPago SDK often wraps errors
-        errorMessage = error.cause.message || errorMessage;
+        const errorInfo = error.cause.data || {};
+        errorMessage = errorInfo.message || error.cause.message || errorMessage;
     }
     
     return NextResponse.json(

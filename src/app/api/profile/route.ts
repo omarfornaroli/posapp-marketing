@@ -1,3 +1,4 @@
+
 'use server';
 
 import {NextResponse, type NextRequest} from 'next/server';
@@ -6,6 +7,7 @@ import {z} from 'zod';
 import {connectToDatabase} from '@/lib/mongodb';
 import Enterprise from '@/models/enterprise';
 import '@/models/deployment'; // Ensure Deployment model is registered
+import '@/models/subscription'; // Ensure Subscription model is registered
 
 const profileUpdateSchema = z.object({
   businessName: z.string().min(2, "El nombre del negocio debe tener al menos 2 caracteres."),
@@ -39,7 +41,7 @@ export async function GET(request: NextRequest) {
     
     await connectToDatabase();
     
-    const user = await Enterprise.findById(decoded.userId).select('-password').populate('deployment');
+    const user = await Enterprise.findById(decoded.userId).select('-password').populate('deployment').populate('subscription');
 
     if (!user) {
       return NextResponse.json(
@@ -57,7 +59,8 @@ export async function GET(request: NextRequest) {
             businessIndustry: user.businessIndustry,
             businessAddress: user.businessAddress,
             avatar: `https://picsum.photos/seed/${decoded.userId}/100/100`,
-            deployment: user.deployment || null
+            deployment: user.deployment || null,
+            subscription: user.subscription || null,
         }
     });
 

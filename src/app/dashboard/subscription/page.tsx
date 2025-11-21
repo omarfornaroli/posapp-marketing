@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,8 +12,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, CreditCard, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { subscriptionStatus$, type SubscriptionStatus } from '@/lib/subscription.service';
 import { useToast } from '@/hooks/use-toast';
+
+export type SubscriptionStatus = 'Activa' | 'Inactiva' | 'Pendiente';
+
+interface Subscription {
+    status: SubscriptionStatus;
+}
+
+interface Profile {
+    subscription: Subscription | null;
+}
 
 const statusConfig: Record<
   SubscriptionStatus,
@@ -27,7 +37,7 @@ const statusConfig: Record<
     icon: CheckCircle,
     color: 'text-green-500',
     badgeVariant: 'default',
-    description: 'Tu suscripción está activa. El próximo pago se realizará el 20/12/2024.',
+    description: 'Tu suscripción está activa y todas las funciones están disponibles.',
   },
   Inactiva: {
     icon: XCircle,
@@ -39,25 +49,45 @@ const statusConfig: Record<
     icon: CreditCard,
     color: 'text-orange-500',
     badgeVariant: 'secondary',
-    description: 'Tu suscripción está pendiente de pago. La estamos procesando.',
+    description: 'Tu suscripción está pendiente de pago o confirmación. Puede tomar unos minutos.',
   },
 };
 
 export default function SubscriptionPage() {
-  const [currentStatus, setCurrentStatus] = useState<SubscriptionStatus | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingProfile, setIsFetchingProfile] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const subscription = subscriptionStatus$.subscribe(status => {
-      setCurrentStatus(status);
-    });
+    const fetchProfile = async () => {
+        setIsFetchingProfile(true);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            toast({ variant: 'destructive', title: 'Error', description: 'No estás autenticado.'});
+            setIsFetchingProfile(false);
+            return;
+        }
 
-    // Cleanup subscription on component unmount
-    return () => {
-      subscription.unsubscribe();
+        try {
+            const response = await fetch('/api/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (data.success) {
+                setProfile(data.profile);
+            } else {
+                throw new Error(data.message || 'No se pudo cargar el perfil.');
+            }
+        } catch (e: any) {
+             toast({ variant: 'destructive', title: 'Error al cargar datos', description: e.message });
+        } finally {
+            setIsFetchingProfile(false);
+        }
     };
-  }, []);
+
+    fetchProfile();
+  }, [toast]);
 
   const handleSubscriptionClick = async () => {
     setIsLoading(true);
@@ -97,7 +127,7 @@ export default function SubscriptionPage() {
   };
 
 
-  if (currentStatus === null) {
+  if (isFetchingProfile) {
       return (
         <div className="flex h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-4">
@@ -108,6 +138,7 @@ export default function SubscriptionPage() {
       );
   }
 
+  const currentStatus = profile?.subscription?.status || 'Inactiva';
   const { icon: StatusIcon, color, badgeVariant, description } = statusConfig[currentStatus];
 
   return (
