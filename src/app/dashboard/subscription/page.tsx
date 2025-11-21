@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, CreditCard, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { subscriptionStatus$, type SubscriptionStatus } from '@/lib/subscription.service';
+import { useToast } from '@/hooks/use-toast';
 
 const statusConfig: Record<
   SubscriptionStatus,
@@ -44,6 +45,8 @@ const statusConfig: Record<
 
 export default function SubscriptionPage() {
   const [currentStatus, setCurrentStatus] = useState<SubscriptionStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const subscription = subscriptionStatus$.subscribe(status => {
@@ -55,6 +58,44 @@ export default function SubscriptionPage() {
       subscription.unsubscribe();
     };
   }, []);
+
+  const handleSubscriptionClick = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Debes iniciar sesión para gestionar tu suscripción."
+        });
+        setIsLoading(false);
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/create-subscription', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await response.json();
+        if (result.success && result.init_point) {
+            window.location.href = result.init_point;
+        } else {
+            throw new Error(result.message || "No se pudo redirigir a Mercado Pago.");
+        }
+    } catch(e: any) {
+        toast({
+            variant: "destructive",
+            title: "Error de Suscripción",
+            description: e.message
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
 
   if (currentStatus === null) {
       return (
@@ -90,9 +131,9 @@ export default function SubscriptionPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-[#009EE3] hover:bg-[#008ACB]">
-                <CreditCard className="mr-2 h-4 w-4" />
-                {currentStatus === 'Activa' ? 'Gestionar en Mercado Pago' : 'Suscribirse con Mercado Pago'}
+              <Button onClick={handleSubscriptionClick} disabled={isLoading} className="bg-[#009EE3] hover:bg-[#008ACB]">
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                {isLoading ? "Procesando..." : (currentStatus === 'Activa' ? 'Gestionar en Mercado Pago' : 'Suscribirse con Mercado Pago')}
               </Button>
               {currentStatus === 'Activa' && (
                 <Button variant="destructive">

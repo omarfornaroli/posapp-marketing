@@ -42,6 +42,7 @@ const stepFields: FieldName<OnboardingData>[][] = [
 export default function OnboardingFlow() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
@@ -103,6 +104,45 @@ export default function OnboardingFlow() {
     }
   };
 
+  const handleSubscriptionClick = async () => {
+    setIsSubscriptionLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // This case should not happen if the registration flow requires login first.
+        // For now, we will just show a toast. In a real app, you might redirect.
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Debes iniciar sesión para crear una suscripción."
+        });
+        setIsSubscriptionLoading(false);
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/create-subscription', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await response.json();
+        if (result.success && result.init_point) {
+            window.location.href = result.init_point;
+        } else {
+            throw new Error(result.message || "No se pudo redirigir a Mercado Pago.");
+        }
+    } catch(e: any) {
+        toast({
+            variant: "destructive",
+            title: "Error de Suscripción",
+            description: e.message
+        });
+    } finally {
+        setIsSubscriptionLoading(false);
+    }
+  };
+
+
   const formContent = (
     <AnimatePresence mode="wait">
       <motion.div
@@ -147,11 +187,11 @@ export default function OnboardingFlow() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <p className="text-muted-foreground">
-                        Haz clic en el botón a continuación para configurar tu suscripción a través de Mercado Pago. Serás redirigido a su plataforma segura para completar el proceso.
+                        Para completar el registro, es necesario crear una suscripción a través de Mercado Pago. Serás redirigido a su plataforma segura.
                     </p>
-                    <Button className="w-full bg-[#009EE3] hover:bg-[#008ACB]">
-                        <CreditCard className="mr-2" />
-                        Suscribirse con Mercado Pago
+                    <Button onClick={handleSubscriptionClick} disabled={isSubscriptionLoading} className="w-full bg-[#009EE3] hover:bg-[#008ACB]">
+                        {isSubscriptionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2" />}
+                        {isSubscriptionLoading ? "Redirigiendo..." : "Suscribirse con Mercado Pago"}
                     </Button>
                 </CardContent>
             </Card>
