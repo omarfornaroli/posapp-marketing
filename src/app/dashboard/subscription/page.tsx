@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -53,14 +54,15 @@ const statusConfig: Record<
   },
 };
 
-export default function SubscriptionPage() {
+function SubscriptionPageComponent() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingProfile, setIsFetchingProfile] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
+  const searchParams = useSearchParams();
+  
+  const fetchProfile = async () => {
         setIsFetchingProfile(true);
         const token = localStorage.getItem('token');
         if (!token) {
@@ -86,8 +88,44 @@ export default function SubscriptionPage() {
         }
     };
 
-    fetchProfile();
-  }, [toast]);
+
+  useEffect(() => {
+    const preapprovalId = searchParams.get('preapproval_id');
+
+    const verifySubscription = async (id: string) => {
+      setIsVerifying(true);
+      try {
+        const response = await fetch('/api/check-subscription-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preapproval_id: id }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          toast({
+            title: '¡Suscripción Activada!',
+            description: 'Tu suscripción ha sido confirmada y activada con éxito.',
+          });
+          // Refresh profile data to show the new status
+          await fetchProfile();
+        } else {
+           throw new Error(result.message || 'No se pudo verificar la suscripción.');
+        }
+      } catch (e: any) {
+         toast({ variant: 'destructive', title: 'Error de Verificación', description: e.message });
+      } finally {
+        setIsVerifying(false);
+         // Clean the URL to remove query params
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+    
+    if (preapprovalId) {
+      verifySubscription(preapprovalId);
+    } else {
+       fetchProfile();
+    }
+  }, [searchParams, toast]);
 
   const handleSubscriptionClick = async () => {
     setIsLoading(true);
@@ -127,12 +165,14 @@ export default function SubscriptionPage() {
   };
 
 
-  if (isFetchingProfile) {
+  if (isFetchingProfile || isVerifying) {
       return (
         <div className="flex h-screen w-full items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Consultando estado de la suscripción...</p>
+            <p className="text-muted-foreground">
+                {isVerifying ? 'Verificando pago de suscripción...' : 'Consultando estado de la suscripción...'}
+            </p>
           </div>
         </div>
       );
@@ -178,4 +218,12 @@ export default function SubscriptionPage() {
       </main>
     </div>
   );
+}
+
+export default function SubscriptionPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <SubscriptionPageComponent />
+        </Suspense>
+    )
 }

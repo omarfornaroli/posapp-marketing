@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 import {MercadoPagoConfig, PreApproval} from 'mercadopago';
 import Enterprise from '@/models/enterprise';
 import { connectToDatabase } from '@/lib/mongodb';
+import Subscription from '@/models/subscription';
+
 
 export async function POST(request: NextRequest) {
   const mpClient = new MercadoPagoConfig({
@@ -33,20 +35,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const decoded = jwt.verify(token, secret) as {userId: string; email?: string};
-    let userEmail = decoded.email;
-
-    if (!userEmail) {
-        await connectToDatabase();
-        const user = await Enterprise.findById(decoded.userId);
-        if (!user) {
-             return NextResponse.json({success: false, message: 'Usuario no encontrado.'}, {status: 404});
-        }
-        userEmail = user.email;
+    
+    await connectToDatabase();
+    
+    const user = await Enterprise.findById(decoded.userId).populate('subscription');
+    if (!user) {
+         return NextResponse.json({success: false, message: 'Usuario no encontrado.'}, {status: 404});
     }
+    const userEmail = user.email;
 
     const preApproval = new PreApproval(mpClient);
 
-    const subscription = await preApproval.create({
+    const subscriptionResponse = await preApproval.create({
       body: {
         back_url: `${process.env.APP_URL}/dashboard/subscription`,
         reason: 'Suscripción a Posify',
@@ -61,10 +61,17 @@ export async function POST(request: NextRequest) {
       },
     });
     
-    if (subscription.init_point) {
-        return NextResponse.json({ success: true, init_point: subscription.init_point });
+    if (subscriptionResponse.init_point) {
+        // Save preapproval_id to the user's subscription
+        const userSubscription = await Subscription.findById(user.subscription);
+        if (userSubscription) {
+          userSubscription.preapproval_id = subscriptionResponse.id;
+          await userSubscription.save();
+        }
+
+        return NextResponse.json({ success: true, init_point: subscriptionResponse.init_point });
     } else {
-        console.error("MercadoPago API response missing init_point:", subscription);
+        console.error("MercadoPago API response missing init_point:", subscriptionResponse);
         return NextResponse.json({ success: false, message: "No se pudo crear el enlace de pago." }, { status: 500 });
     }
 
