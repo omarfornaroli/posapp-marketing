@@ -144,19 +144,19 @@ export default function DashboardLayout({
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                href="/dashboard"
-                isActive={isActive('/dashboard')}
-                tooltip="Dashboard"
+                href="/panel"
+                isActive={isActive('/panel')}
+                tooltip="Panel"
               >
                 <Home />
-                <span>Dashboard</span>
+                <span>Panel</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
               <SidebarMenuButton
-                href="/dashboard/deploy"
-                isActive={isActive('/dashboard/deploy')}
+                href="/deploy"
+                isActive={isActive('/deploy')}
                 tooltip="Estado de la app"
               >
                 <Server />
@@ -166,8 +166,8 @@ export default function DashboardLayout({
 
             <SidebarMenuItem>
               <SidebarMenuButton
-                href="/dashboard/subscription"
-                isActive={isActive('/dashboard/subscription')}
+                href="/subscription"
+                isActive={isActive('/subscription')}
                 tooltip="Suscripción"
               >
                 <CreditCard />
@@ -176,8 +176,8 @@ export default function DashboardLayout({
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton
-                href="/dashboard/profile"
-                isActive={isActive('/dashboard/profile')}
+                href="/profile"
+                isActive={isActive('/profile')}
                 tooltip="Perfil"
               >
                 <User />

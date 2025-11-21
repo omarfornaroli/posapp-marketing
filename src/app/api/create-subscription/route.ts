@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     const subscriptionResponse = await preApproval.create({
       body: {
-        back_url: `${process.env.APP_URL}/dashboard/subscription`,
+        back_url: `${process.env.APP_URL}/subscription`,
         reason: 'Suscripción a Posify',
         auto_recurring: {
           frequency: 1,

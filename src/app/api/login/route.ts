@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       success: true,
       message: 'Inicio de sesión exitoso.',
       token: token,
-      redirectTo: '/dashboard',
+      redirectTo: '/panel',
     });
 
     return response;
