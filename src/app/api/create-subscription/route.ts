@@ -1,3 +1,4 @@
+
 'use server';
 
 import {NextResponse, type NextRequest} from 'next/server';
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
         auto_recurring: {
           frequency: 1,
           frequency_type: 'months',
-          transaction_amount: 1000,
+          transaction_amount: 40000,
           currency_id: 'ARS',
         },
         payer_email: userEmail,
