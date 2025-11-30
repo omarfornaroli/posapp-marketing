@@ -1,9 +1,9 @@
 [
   {
     "id": "hero",
-    "src": "https://picsum.photos/seed/hero/1200/800",
-    "alt": "A modern point of sale system in a stylish retail environment.",
-    "hint": "retail store"
+    "src": "https://storage.googleapis.com/aip-dev-product-bucket/user-project-images/4a71a029-dfd5-4521-8255-6677983a54d9.png",
+    "alt": "A dashboard of the POS system showing sales, products, and clients.",
+    "hint": "app dashboard"
   },
   {
     "id": "login",
