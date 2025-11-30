@@ -3,9 +3,6 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import {
   BarChart,
   ShoppingCart,
@@ -18,6 +15,8 @@ import {
   Languages,
 } from 'lucide-react';
 import Header from '@/components/header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const appTitle = 'Posify';
 
@@ -26,37 +25,31 @@ const features = [
       icon: ShoppingCart,
       title: 'Punto de Venta Avanzado',
       description: 'Interfaz intuitiva con escaneo de códigos de barras, descuentos por ítem o total, y procesamiento de múltiples métodos de pago.',
-      imgSrc: '/img/pos.png',
     },
     {
       icon: Box,
       title: 'Gestión de Productos',
       description: 'Control total de tu inventario con operaciones CRUD, seguimiento de stock, puntos de reorden e importación/exportación avanzada.',
-      imgSrc: '/img/products.png',
     },
     {
       icon: BarChart,
       title: 'Reportes y Analítica',
       description: 'Toma decisiones informadas con reportes de ventas, análisis de rentabilidad y un historial completo de transacciones.',
-      imgSrc: '/img/reports.png'
     },
     {
       icon: BrainCircuit,
       title: 'Consultas con IA',
       description: 'Genera reportes complejos usando lenguaje natural y obtén resúmenes inteligentes para entender tus datos al instante.',
-      imgSrc: '/img/ai.png'
     },
     {
       icon: Users,
       title: 'Gestión de Clientes (CRM)',
       description: 'Fideliza a tus clientes con perfiles detallados, historial de compras y herramientas de marketing integradas.',
-      imgSrc: '/img/clients.png'
     },
     {
       icon: Undo2,
       title: 'Gestión de Devoluciones',
       description: 'Procesa devoluciones fácilmente buscando la venta original y reabastece tu inventario automáticamente.',
-      imgSrc: '/img/returns.png'
     },
 ];
 
@@ -78,39 +71,6 @@ const whyChooseUs = [
   },
 ];
 
-function FeatureSection({ feature, index }: { feature: typeof features[0]; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ['-20%', '10%']);
-  const isOdd = index % 2 !== 0;
-
-  return (
-    <div ref={ref} className="container mx-auto px-4 py-16 sm:py-24 overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className={`md:order-${isOdd ? 2 : 1}`}>
-          <div className="flex items-center gap-4 mb-4">
-            <feature.icon className="w-8 h-8 text-primary" />
-            <h3 className="text-2xl sm:text-3xl font-bold">{feature.title}</h3>
-          </div>
-          <p className="text-muted-foreground text-lg">{feature.description}</p>
-        </div>
-        <div className={`md:order-${isOdd ? 1 : 2} relative`}>
-            <motion.div style={{ y }} className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
-              <Image
-                src={feature.imgSrc}
-                alt={feature.title}
-                fill
-                className="object-cover object-top"
-              />
-            </motion.div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function LandingPage() {
   return (
@@ -118,83 +78,62 @@ export default function LandingPage() {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative h-[90vh] sm:h-[100vh] flex items-center justify-center text-center text-white overflow-hidden">
-          <motion.div
-            className="absolute inset-0 z-0"
-            style={{
-              backgroundImage: `url('/img/store-background.jpg')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
-          >
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          </motion.div>
-
-          <div className="relative z-10 p-4 flex flex-col items-center">
-            <div className="w-full max-w-4xl bg-black/30 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl">
-                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                  >
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 [text-shadow:_0_2px_4px_rgb(0_0_0_/_40%)]">
-                    El Punto de Venta Inteligente que tu Negocio Necesita
-                  </h1>
-                  <p className="text-lg sm:text-xl text-white/80 mb-8 max-w-3xl mx-auto [text-shadow:_0_1px_2px_rgb(0_0_0_/_40%)]">
-                    {appTitle} es el sistema POS todo en uno que simplifica tus ventas, optimiza tu inventario y te da el control total con el poder de la IA.
-                  </p>
-               </motion.div>
-
-                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
-                    className="relative w-full aspect-[16/10] max-w-3xl mx-auto rounded-xl shadow-2xl p-2 bg-slate-800 border-4 border-slate-600"
-                  >
-                    <Image
-                        src="/img/pos.png"
-                        alt="POSify Dashboard"
-                        fill
-                        className="object-cover rounded-md"
-                    />
-                </motion.div>
-            </div>
-             <motion.div
-                className="flex justify-center gap-4 mt-8"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-             >
+        <section className="bg-card">
+          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center py-20 sm:py-32">
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary mb-4">
+                El Punto de Venta Inteligente que tu Negocio Necesita
+              </h1>
+              <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto md:mx-0">
+                {appTitle} es el sistema POS todo en uno que simplifica tus ventas, optimiza tu inventario y te da el control total de tu operación con el poder de la IA.
+              </p>
+              <div className="flex justify-center md:justify-start gap-4">
                 <Button asChild size="lg" className="bg-accent hover:bg-accent/90">
                   <Link href="/register">Comenzar Gratis</Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="bg-white/10 border-white/50 text-white hover:bg-white/20">
-                  <Link href="#features">Ver Características</Link>
+                <Button asChild size="lg" variant="outline">
+                    <Link href="#features">Ver Características</Link>
                 </Button>
-              </motion.div>
+              </div>
+            </div>
+             <div className="relative h-80 md:h-full w-full rounded-lg overflow-hidden order-first md:order-last shadow-lg">
+                <Image 
+                    src="https://storage.googleapis.com/aip-dev-product-bucket/user-project-images/4a71a029-dfd5-4521-8255-6677983a54d9.png"
+                    alt="A dashboard of the POS system showing sales, products, and clients."
+                    fill
+                    className="object-cover"
+                    data-ai-hint="app dashboard"
+                />
+            </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="bg-background">
-          <div className="py-20 sm:py-24">
-              <div className="container mx-auto px-4 text-center">
-                  <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                      Todo lo que Necesitas en un Solo Lugar
-                  </h2>
-                  <p className="text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
-                      Desde la venta inicial hasta el reporte final, Posify cubre cada aspecto de tu gestión comercial.
-                  </p>
-              </div>
-               {features.map((feature, index) => (
-                    <FeatureSection key={feature.title} feature={feature} index={index} />
-                ))}
-          </div>
+        <section id="features" className="py-20 sm:py-24">
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                        Todo lo que Necesitas en un Solo Lugar
+                    </h2>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                        Desde la venta inicial hasta el reporte final, Posify cubre cada aspecto de tu gestión comercial.
+                    </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {features.map((feature) => (
+                        <Card key={feature.title} className="flex flex-col">
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <feature.icon className="w-8 h-8 text-primary" />
+                                <CardTitle className="text-xl">{feature.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                                <p className="text-muted-foreground">{feature.description}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
         </section>
-
 
          {/* Why Choose Us Section */}
          <section id="why-posify" className="py-20 sm:py-24 bg-card">
