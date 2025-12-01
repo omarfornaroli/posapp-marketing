@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Store } from 'lucide-react';
 
 export default function Header() {
   const appTitle = 'Posify';
@@ -12,7 +11,28 @@ export default function Header() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <Store className="h-6 w-6 text-primary fill-primary/20" />
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+            >
+              <defs>
+                <linearGradient
+                  id="bright-gradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stopColor="hsl(var(--primary))" />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" />
+                </linearGradient>
+              </defs>
+              <circle cx="12" cy="12" r="10" fill="url(#bright-gradient)" />
+            </svg>
             <span className="font-bold">{appTitle}</span>
           </Link>
         </div>
