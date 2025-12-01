@@ -110,7 +110,7 @@ export default function LandingPage() {
                 src="/img/dashboard.png"
                 alt="Un panel de control del sistema POS que muestra ventas, productos y clientes."
                 fill
-                className="object-cover"
+                className="object-contain"
                 data-ai-hint="app dashboard"
                 priority
               />
