@@ -16,6 +16,13 @@ import {
 import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 const appTitle = 'Posify';
 
@@ -76,6 +83,34 @@ const whyChooseUs = [
     title: 'Soporte Multilingüe',
     description:
       'Gestiona tu negocio sin barreras. Añade nuevos idiomas y tradúcelos automáticamente con IA para expandir tu alcance.',
+  },
+];
+
+const carouselImages = [
+  {
+    src: '/img/pos.png',
+    alt: 'Vista del Punto de Venta de Posify',
+    label: 'Punto de Venta Intuitivo',
+  },
+  {
+    src: '/img/products.png',
+    alt: 'Vista de la gestión de productos en Posify',
+    label: 'Gestión de Productos Completa',
+  },
+  {
+    src: '/img/reports.png',
+    alt: 'Vista de los reportes y analíticas de Posify',
+    label: 'Reportes Detallados',
+  },
+  {
+    src: '/img/clients.png',
+    alt: 'Vista de la gestión de clientes en Posify',
+    label: 'Administración de Clientes (CRM)',
+  },
+  {
+    src: '/img/dashboard.png',
+    alt: 'Vista del panel principal de Posify',
+    label: 'Panel de Control Centralizado',
   },
 ];
 
@@ -145,6 +180,50 @@ export default function LandingPage() {
                 </Card>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Carousel Section */}
+        <section id="gallery" className="py-20 sm:py-24 bg-background">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
+              Posify en Acción
+            </h2>
+            <p className="text-lg text-muted-foreground text-center mb-12 max-w-3xl mx-auto">
+              Explora las interfaces clave de nuestro sistema y descubre lo fácil que es de usar.
+            </p>
+            <Carousel
+              opts={{
+                align: 'start',
+                loop: true,
+              }}
+              className="w-full max-w-4xl mx-auto"
+            >
+              <CarouselContent>
+                {carouselImages.map((image, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Card className="overflow-hidden">
+                        <CardContent className="flex flex-col aspect-video items-center justify-center p-0">
+                          <Image
+                            src={image.src}
+                            alt={image.alt}
+                            width={800}
+                            height={600}
+                            className="w-full h-full object-cover"
+                          />
+                        </CardContent>
+                        <div className="p-4 bg-muted/50">
+                           <p className="text-sm font-medium text-center text-foreground">{image.label}</p>
+                        </div>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         </section>
 
