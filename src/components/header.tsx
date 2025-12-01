@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Package } from 'lucide-react';
+import { Store } from 'lucide-react';
 
 export default function Header() {
   const appTitle = 'Posify';
@@ -12,7 +12,7 @@ export default function Header() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <Package className="h-6 w-6 text-primary" />
+            <Store className="h-6 w-6 text-primary fill-primary/20" />
             <span className="font-bold">{appTitle}</span>
           </Link>
         </div>
