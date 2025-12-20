@@ -1,21 +1,22 @@
-# Evita que el contexto de build de Docker se llene de archivos innecesarios
-
-# Dependencias locales
+# Ignore node_modules, as they will be installed inside the container
 node_modules
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Ignore local build outputs
+.next
 
-# Variables de entorno locales
-.env
-.env.local
+# Ignore local environment files
+.env*
+!/.env.example
 
-# Archivos del editor
-.vscode
-.idea
+# Ignore Docker files
+Dockerfile
+docker-compose.yml
 
-# Otros
-.DS_Store
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore VSCode and other editor/OS files
+.vscode/
 README.md
+*.log
